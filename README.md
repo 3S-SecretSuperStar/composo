@@ -1,3 +1,3 @@
 # Composo
 
-bruh
+Thesis B code mateiral.
