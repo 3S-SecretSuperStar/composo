@@ -19,14 +19,14 @@ componentDidMount = async () => {
         this.ItemManager = new this.web3.eth.Contract(
             ItemManager.abi, 
             ItemManager.networks[networkId] && ItemManager.networks[networkId].address,
-            );
+        );
             
         this.Item = new this.web3.eth.Contract(
             Item.abi,
             Item.networks[networkId] && Item.networks[networkId].address,
         );
         
-        //this.listenToPaymentEvent();
+        this.listenToPaymentEvent();
         this.setState({loaded: true});
 
     } 
@@ -37,6 +37,44 @@ componentDidMount = async () => {
         console.error(error);
     }
 };
+
+handleSubmit = async () => {
+        
+        console.log("Account 0: ", this.accounts[0]);
+        const { cost, itemName } = this.state;
+        console.log("ItemManager", this.ItemManager);
+        console.log(itemName, cost, this.ItemManager);
+        let result = await this.ItemManager.methods.createItem(itemName, cost).send({ 
+            from: this.accounts[0] });
+        console.log(result);
+        
+        alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
+        console.log("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
+    };
+
+handleInputChange = (event) => {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value; const name = target.name;
+    
+    this.setState({
+        [name]: value
+    });
+}
+
+listenToPaymentEvent = () => {
+    let self = this;
+    self.ItemManager.events.SupplyChainStep().on("data", async function(evt) {
+    if(evt.returnValues._step === 1) {
+        let item = await self.ItemManager.methods.items(evt.returnValues._itemIndex).call();
+        console.log(item);
+        alert("Item " + item._identifier + " was paid, deliver it now!"); 
+        console.log("Item " + item._identifier + " was paid, deliver it now!"); 
+    };
+      
+    console.log(evt);
+    });
+}
+
 
 render() {
     if (!this.state.loaded) {
@@ -53,38 +91,6 @@ render() {
         </div>
     ); 
 }
-
-handleSubmit = async () => {
-        const { cost, itemName } = this.state;
-        console.log(itemName, cost, this.itemManager);
-        let result = await this.itemManager.methods.createItem(itemName, cost).send({ 
-            from: this.accounts[0] });
-        console.log(result);
-        
-        alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
-    };
-
-handleInputChange = (event) => {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value; const name = target.name;
-    
-    this.setState({
-        [name]: value
-    });
-}
-
-// listenToPaymentEvent = () => {
-//     let self = this;
-//     this.itemManager.events.SupplyChainStep().on("data", async function(evt) {
-//     if(evt.returnValues._step === 1) {
-//         let item = await self.itemManager.methods.items(evt.returnValues._itemIndex).call();
-//         console.log(item);
-//         alert("Item " + item._identifier + " was paid, deliver it now!"); 
-//     };
-      
-//     console.log(evt);
-//     });
-// }
 
 }
 
