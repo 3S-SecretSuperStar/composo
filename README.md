@@ -17,9 +17,8 @@ There's a specific way to launch everything in /supp_chain:
 
 
 The current stub implementation has 3 things:
-
-- 1 itemManager contracts to keep track of created Items
-- 1 Item contract to kept track of the items deets (name of item, price, stage in supply chain)
+- 1 Item contract to kept track of the items details (name of item, price, stage in supply chain)
+- 1 ItemManager contract to keep track of created Items
 
 You can successfully create an item with a price from the frontend, which creates a an Item contract and adds it as a mapping in the ItemManager contract.
 
