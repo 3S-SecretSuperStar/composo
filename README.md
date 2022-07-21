@@ -3,7 +3,7 @@
 Thesis B code mateiral.
 
 Setting up Supp_Chain:
-There's a soecific way to launch everything in supp_chain:
+There's a specific way to launch everything in supp_chain:
 1. fire up ganache on port 8545
 2. "npm start" in /client
 3. add ganache contract private key/s to metamask
