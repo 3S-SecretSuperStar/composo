@@ -3,6 +3,20 @@
 Thesis B code mateiral.
 
 Setting up Supp_Chain:
+There's a soecific way to launch everything in supp_chain
+if u want to try it out
+1. fire up ganache on port 8545
+2. "npm start" in /client
+3. add ganache contract private key/s to metamask
+4. connect metamask to port 8545 
+5. run the "truffle develop" command in /truffle
+6. run the "migrate" command in /truffle
+7. run the "truffle migrate --network development" command to deploy contracts on 8545
+8. connect the ganache account/s on metamask to 8545
+9. (optional) add the truffle-config.js file to ganache for transaction data
+10. click the add item button and it should fire up metamask, and stuff on the console
+
+
 The current stub implementation has 3 things:
 
 - 1 itemManager contracts to keep track of created Items
