@@ -9,11 +9,10 @@ There's a specific way to launch everything in /supp_chain:
 3. add ganache contract private key/s to metamask
 4. connect metamask to port 8545 
 5. run the "truffle develop" command in /truffle
-6. run the "migrate" command in /truffle
-7. run the "truffle migrate --network development" command to deploy contracts on 8545
-8. connect the ganache account/s on metamask to 8545
-9. (optional) add the truffle-config.js file to ganache for transaction data
-10. click the add item button and it should fire up metamask, and stuff on the console
+6. run the "truffle migrate --network development" command to deploy contracts on 8545
+7. connect the ganache account/s on metamask to 8545
+8. (optional) add the truffle-config.js file to ganache for transaction data
+9. click the add item button and it should fire up metamask, and stuff on the console
 
 
 The current stub implementation has 3 things:
