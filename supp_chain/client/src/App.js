@@ -40,17 +40,17 @@ componentDidMount = async () => {
 
 handleSubmit = async () => {
         
-        console.log("Account 0: ", this.accounts[0]);
-        const { cost, itemName } = this.state;
-        console.log("ItemManager", this.ItemManager);
-        console.log(itemName, cost, this.ItemManager);
-        let result = await this.ItemManager.methods.createItem(itemName, cost).send({ 
-            from: this.accounts[0] });
-        console.log(result);
-        
-        alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
-        console.log("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
-    };
+    // console.log("Account 0: ", this.accounts[0]);
+    const { cost, itemName } = this.state;
+    // console.log("ItemManager", this.ItemManager);
+    console.log(itemName, cost, this.ItemManager);
+    let result = await this.ItemManager.methods.createItem(itemName, cost).send({ 
+        from: this.accounts[0] });
+    // console.log(result);
+    
+    alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
+    console.log("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
+}
 
 handleInputChange = (event) => {
     const target = event.target;
@@ -63,14 +63,16 @@ handleInputChange = (event) => {
 
 listenToPaymentEvent = () => {
     let self = this;
-    self.ItemManager.events.SupplyChainStep().on("data", async function(evt) {
-    if(evt.returnValues._step === 1) {
-        let item = await self.ItemManager.methods.items(evt.returnValues._itemIndex).call();
-        console.log(item);
-        alert("Item " + item._identifier + " was paid, deliver it now!"); 
-        console.log("Item " + item._identifier + " was paid, deliver it now!"); 
+    this.ItemManager.events.SupplyChainStep().on("data", async function(evt){
+    
+    if (evt.returnValues._step === "1") {
+        let itemPaid = await self.ItemManager.methods.items(evt.returnValues._itemindex - 1).call();
+        console.log(itemPaid);
+        alert("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
+        console.log("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
+        
     };
-      
+        
     console.log(evt);
     });
 }
