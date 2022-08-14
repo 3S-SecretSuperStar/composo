@@ -10,6 +10,7 @@ import LandingComp from './components/landing'
 // import Article_comp from './components/article_comp'
 // import Carousel_Comp from './components/carousel_comp'
 import FooterComp from './components/foot_comp'
+import InputComp from './components/Input'
 // import leftData from  './components/leftSidebar'
 
 /* --------------------------------- Styling -------------------------------- */
@@ -61,7 +62,12 @@ ReactDOM.render(
 // );
 
 
-
+ReactDOM.render(
+  <React.StrictMode>
+    <InputComp/>
+  </React.StrictMode>,
+  document.getElementById('landing')
+);
 
 
 

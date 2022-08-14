@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import ItemManager from "./contracts/ItemManager.json";
-import Item from "./contracts/Item.json";
+import ERC998ERC1155TopDownPresetMinterPauser from "./contracts/ERC998ERC1155TopDownPresetMinterPauser.json";
+// import Item from "./contracts/Item.json";
 import getWeb3 from "./getWeb3"; 
 import "./App.css";
 
@@ -16,17 +16,17 @@ componentDidMount = async () => {
         this.accounts = await this.web3.eth.getAccounts(); // Get the contract instance.
         const networkId = await this.web3.eth.net.getId(); 
         
-        this.ItemManager = new this.web3.eth.Contract(
-            ItemManager.abi, 
-            ItemManager.networks[networkId] && ItemManager.networks[networkId].address,
+        this.ERC998ERC1155TopDownPresetMinterPauser = new this.web3.eth.Contract(
+            ERC998ERC1155TopDownPresetMinterPauser.abi, 
+            ERC998ERC1155TopDownPresetMinterPauser.networks[networkId] && ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address,
         );
             
-        this.Item = new this.web3.eth.Contract(
-            Item.abi,
-            Item.networks[networkId] && Item.networks[networkId].address,
-        );
+        // this.Item = new this.web3.eth.Contract(
+        //     Item.abi,
+        //     Item.networks[networkId] && Item.networks[networkId].address,
+        // );
         
-        this.listenToPaymentEvent();
+        // this.listenToPaymentEvent();
         this.setState({loaded: true});
 
     } 
@@ -43,13 +43,15 @@ handleSubmit = async () => {
     // console.log("Account 0: ", this.accounts[0]);
     const { cost, itemName } = this.state;
     // console.log("ItemManager", this.ItemManager);
-    console.log(itemName, cost, this.ItemManager);
-    let result = await this.ItemManager.methods.createItem(itemName, cost).send({ 
+    // console.log(itemName, cost, this.ItemManager);
+    // let a = await this.ERC998ERC1155TopDownPresetMinterPauser.new("erc998", "ERC998", "https://ERC998.com/{id}", { from: this.accounts[0] });
+    let result = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.mint(this.accounts[0], 1).send({ 
         from: this.accounts[0] });
-    // console.log(result);
+    // console.log(a);
+    console.log(result);
     
-    alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
-    console.log("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
+    // alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
+    // console.log(result);
 }
 
 handleInputChange = (event) => {
@@ -61,21 +63,21 @@ handleInputChange = (event) => {
     });
 }
 
-listenToPaymentEvent = () => {
-    let self = this;
-    this.ItemManager.events.SupplyChainStep().on("data", async function(evt){
+// listenToPaymentEvent = () => {
+//     let self = this;
+//     this.ItemManager.events.SupplyChainStep().on("data", async function(evt){
     
-    if (evt.returnValues._step === "1") {
-        let itemPaid = await self.ItemManager.methods.items(evt.returnValues._itemindex - 1).call();
-        console.log(itemPaid);
-        alert("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
-        console.log("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
+//     if (evt.returnValues._step === "1") {
+//         let itemPaid = await self.ItemManager.methods.items(evt.returnValues._itemindex - 1).call();
+//         console.log(itemPaid);
+//         alert("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
+//         console.log("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
         
-    };
+//     };
         
-    console.log(evt);
-    });
-}
+//     console.log(evt);
+//     });
+// }
 
 
 render() {

@@ -77,7 +77,7 @@
   "sourceMap": "55:921:0:-:0;;;184:187;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;287:11;274:10;:24;;;;316:6;308:5;:14;;;;349:15;332:14;;:32;;;;;;;;;;;;;;;;;;184:187;;;55:921;;;;;;",
   "deployedSourceMap": "55:921:0:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;491:10;;478:9;:23;470:69;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;620:1;609:7;;:12;601:46;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;677:9;666:7;;:20;;;;;;;;;;;697:12;723:14;;;;;;;;;;;715:37;;759:9;821:5;;770:57;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;715:113;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;696:132;;;899:7;891:41;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;377:563;55:921;;;;;;;;;;;;;128:17;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;75:22;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;103:19;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;128:17;;;;:::o;75:22::-;;;;:::o;103:19::-;;;;:::o",
   "source": "pragma solidity ^0.6.0; \n\nimport \"./ItemManager.sol\";\n\ncontract Item {\n    uint public priceInWei;\n    uint public paidWei;\n    uint public index;\n\n    ItemManager parentContract;\n    constructor(ItemManager _parentContract, uint _priceInWei, uint _index) public { \n        priceInWei = _priceInWei;\n        index = _index;\n        parentContract = _parentContract;\n    }\n\n    receive() external payable {\n\n        // if msg.value != priceInWei, emit \"sentence\"\n        require(msg.value == priceInWei, \"We don't support partial payments\"); \n        // check if item has already been paid for\n        require(paidWei == 0, \"Item is already paid!\");\n        \n        paidWei += msg.value;\n        (bool success, ) = address(parentContract).\n        call{value:msg.value}(abi.encodeWithSignature(\"triggerPayment(uint256)\", index));\n        \n        // require parent contract to exist\n        require(success, \"Delivery did not work\"); \n    }\n\n    fallback () external {\n    }\n}",
-  "sourcePath": "/Users/moose/Documents/Projects/composo/supp_chain/truffle/contracts/Item.sol",
+  "sourcePath": "/home/prams25/thesisB/composo/supp_chain/truffle/contracts/Item.sol",
   "ast": {
     "absolutePath": "project:/contracts/Item.sol",
     "exportedSymbols": {
@@ -2526,7 +2526,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.7",
-  "updatedAt": "2022-07-19T00:47:31.979Z",
+  "updatedAt": "2022-08-08T06:54:11.414Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

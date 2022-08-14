@@ -35,7 +35,7 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.6.0; \n\ncontract Ownable {\n    address public _owner;\n    \n    constructor () internal { \n        _owner = msg.sender;\n    }\n/**\n* @dev Throws if called by any account other than the owner. */\n\n    modifier onlyOwner() {\n        require(isOwner(), \"Ownable: caller is not the owner\"); _;\n    }\n\n/**\n* @dev Returns true if the caller is the current owner. */\n    function isOwner() public view returns (bool) { return (msg.sender == _owner);\n    } \n\n}\n",
-  "sourcePath": "/Users/moose/Documents/Projects/composo/supp_chain/truffle/contracts/Ownable.sol",
+  "sourcePath": "/home/prams25/thesisB/composo/supp_chain/truffle/contracts/Ownable.sol",
   "ast": {
     "absolutePath": "project:/contracts/Ownable.sol",
     "exportedSymbols": {
@@ -1024,7 +1024,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.7",
-  "updatedAt": "2022-07-19T00:47:31.985Z",
+  "updatedAt": "2022-08-08T06:54:11.442Z",
   "devdoc": {
     "kind": "dev",
     "methods": {

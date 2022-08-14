@@ -9,7 +9,7 @@ var content = `
                     class="fab fa-github"></i></a>
         </div>
         </div>
-        <div class="container">Copyright &copy; Virchu 2021</div>
+        <div class="container">Copyright &copy; Composo 2022</div>
     </footer>
 `;
 
