@@ -61,6 +61,7 @@ contract ERC998ERC1155TopDownPresetMinterPauser is Context, AccessControl, ERC99
         _mint(to, tokenId);
     }
 
+
     /**
      * @dev Burns `tokenId`. See {ERC721-_burn}.
      *

@@ -21,7 +21,7 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    mapping(uint256 => mapping(address => mapping(uint256 => uint256))) private _balances;
+    mapping(uint256 => mapping(address => mapping(uint256 => uint256))) public _balances;
     mapping(address => mapping(uint256 => EnumerableSet.UintSet)) private _holdersOf;
 
     mapping(uint256 => EnumerableSet.AddressSet) private _childContract;

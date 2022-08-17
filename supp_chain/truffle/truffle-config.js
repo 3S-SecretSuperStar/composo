@@ -39,12 +39,12 @@ module.exports = {
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
-    // You should run a client (like ganache, geth, or parity) in a separate terminal
+    // You should run a client (like ganache, geth, or parity) in a separate terminaltruffl
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
     development: {
-      host: "172.28.128.1",     // Localhost (default: none)
+      host: "172.22.32.1",     // Localhost (default: none)
       port: 8545,            // Standard Ethereum port (default: none)
       network_id: "5777",       // Any network (default: none)
     },

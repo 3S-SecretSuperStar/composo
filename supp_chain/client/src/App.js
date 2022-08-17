@@ -1,12 +1,15 @@
 import React, { Component } from "react";
 import ERC998ERC1155TopDownPresetMinterPauser from "./contracts/ERC998ERC1155TopDownPresetMinterPauser.json";
 // import Item from "./contracts/Item.json";
+import ERC998ERC1155TopDown from "./contracts/ERC998ERC1155TopDown.json";
+import ERC1155PresetMinterPauser from "./contracts/ERC1155PresetMinterPauser.json";
 import getWeb3 from "./getWeb3"; 
 import "./App.css";
 
 
 class App extends Component {
-    state = {cost: 0, itemName: "exampleItem1", loaded:false};
+    state = {acc_address: 0, tokenID: 0, loaded:false};
+    child = "";
 
 componentDidMount = async () => { 
     try {
@@ -20,6 +23,18 @@ componentDidMount = async () => {
             ERC998ERC1155TopDownPresetMinterPauser.abi, 
             ERC998ERC1155TopDownPresetMinterPauser.networks[networkId] && ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address,
         );
+
+        this.ERC998ERC1155TopDown = new this.web3.eth.Contract(
+            ERC998ERC1155TopDown.abi,
+            ERC998ERC1155TopDown.networks[networkId] && ERC998ERC1155TopDown.networks[networkId].address,
+        );
+
+        this.ERC1155PresetMinterPauser = new this.web3.eth.Contract(
+            ERC1155PresetMinterPauser.abi,
+            ERC1155PresetMinterPauser.networks[networkId] && ERC1155PresetMinterPauser.networks[networkId].address,
+        );
+
+
             
         // this.Item = new this.web3.eth.Contract(
         //     Item.abi,
@@ -38,19 +53,69 @@ componentDidMount = async () => {
     }
 };
 
-handleSubmit = async () => {
+mintToken = async () => {
         
     // console.log("Account 0: ", this.accounts[0]);
-    const { cost, itemName } = this.state;
+    const { acc_address, tokenID } = this.state;
     // console.log("ItemManager", this.ItemManager);
     // console.log(itemName, cost, this.ItemManager);
     // let a = await this.ERC998ERC1155TopDownPresetMinterPauser.new("erc998", "ERC998", "https://ERC998.com/{id}", { from: this.accounts[0] });
-    let result = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.mint(this.accounts[0], 1).send({ 
+    // console.log(this.accounts);
+    // console.log(this.ERC998ERC1155TopDownPresetMinterPauser.methods);
+    const networkId = await this.web3.eth.net.getId(); 
+    let a = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+    console.log(a);
+    let result = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.mint(this.accounts[0], tokenID).send({ 
         from: this.accounts[0] });
+    
+    // let result = await this.ERC998ERC1155TopDown.methods.safeTransferChildFrom(3, "0xf0F0CE990F5ff84a54C3dbaBB51Dfe6DE151A85b", this.accounts[0], 4, 1, "").send({ 
+    //     from: this.accounts[0] });
     // console.log(a);
+    // let res2 = await this.ERC998ERC1155TopDown.methods.safeTransferChild
     console.log(result);
+    this.mintChildToken();
     
     // alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
+    // console.log(result);
+}
+
+mintChildToken = async () => {
+    const { acc_address, tokenID } = this.state;
+    
+    // console.log("ItemManager", this.ItemManager);
+    // console.log(itemName, cost, this.ItemManager);
+    // let a = await this.ERC998ERC1155TopDownPresetMinterPauser.new("erc998", "ERC998", "https://ERC998.com/{id}", { from: this.accounts[0] });
+    // let a = await ERC1155("random", { from: this.accounts[0] });
+   // let a = await ERC1155PresetMinterPauser.new("test", { from: this.accounts[0] });
+    let a = parseInt(tokenID);
+    console.log(a + 1);
+    const networkId = await this.web3.eth.net.getId(); 
+    let addr = ERC1155PresetMinterPauser.networks[networkId].address;
+    let result = await this.ERC1155PresetMinterPauser.methods.mint(this.accounts[0], a + 1, 1, "0x").send({ 
+        from: this.accounts[0] });
+    
+    // console.log(a);
+    // let res2 = await this.ERC998ERC1155TopDown.methods.safeTransferChild
+    console.log(result);
+}
+
+transferToken = async () => {
+    // const { acc_address, tokenID } = this.state;
+    // console.log(this.ERC1155PresetMinterPauser.address);
+    const networkId = await this.web3.eth.net.getId(); 
+    let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
+    console.log(addr_from);
+    let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+    // let result = await this.ERC1155PresetMinterPauser.methods.safeTransferFrom(this.accounts[0], addr_to, 2, 1, this.web3.utils.encodePacked(1)).send({ 
+    //     from: this.accounts[0] });
+
+    let cb = this.ERC998ERC1155TopDownPresetMinterPauser.methods._balances(3, addr_from, 2).call();
+    console.log(cb);
+
+    //let n = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.safeTransferChildFrom(1, addr_to, addr_from, 2, 1, this.web3.utils.encodePacked(3)).send({ from: this.accounts[0]});
+    //console.log(n);
+
+    // 
     // console.log(result);
 }
 
@@ -89,9 +154,10 @@ render() {
         <div className="App">
             <h1>Simply Payment/Supply Chain Example</h1> <h2>Items</h2>
             <h2>Items</h2>
-            Cost: <input type="text" name="cost" value={this.state.cost} onChange={this.handleInputChange} />
-            Item Name: <input type="text" name="itemName" value={this.state.itemName} onChange={this.handleInputChange} />
-            <button type="button" onClick={this.handleSubmit}>Create new Item</button>
+            Account Address: <input type="text" name="acc_address" value={this.state.acc_address} onChange={this.handleInputChange} />
+            Token ID: <input type="text" name="tokenID" value={this.state.tokenID} onChange={this.handleInputChange} />
+            <button type="button" onClick={this.mintToken}>Mint</button><br></br>
+            <button type="button" onClick={this.transferToken}>Transfer</button>
         </div>
     ); 
 }
