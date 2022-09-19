@@ -21,6 +21,7 @@ import ERC1155PresetMinterPauser from "./contracts/ERC1155PresetMinterPauser.jso
 import getWeb3 from "./getWeb3"; 
 import "./App.css";
 import { nodes as initialNodes, edges as initialEdges } from './initial-elements';
+import { NFTStorage } from "nft.storage";
 
 
 function App() {
@@ -39,12 +40,34 @@ function App() {
     const [numChildTokens, setNumChildTokens] = useState(0);
     const [tokenName, setTokenName] = useState("");
 
+    async function uploadNFT() {
+        const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
+        var blob = new Blob();
+        try {
+            //Upload NFT to IPFS & Filecoin
+            const metadata = await nftStorage.store({
+                name: 'Harmony NFT collection',
+                description: 'This is a Harmony NFT collenction stored on IPFS & Filecoin.',
+                image: blob,
+            });
+            console.log(metadata)
+            return metadata;
+    
+        } catch (error) {
+            //setErrorMessage("Could not save NFT to NFT.Storage - Aborted minting.");
+            console.log(error);
+        }
+    }
+
+    // const res = await uploadNFT();
 
     //component mount
     useEffect(() => {
         
         async function componentDidMount() {
             await loadContracts();
+            let res = await uploadNFT();
+            console.log(res);
         }
             
         componentDidMount();
