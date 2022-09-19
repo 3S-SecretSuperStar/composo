@@ -1,168 +1,298 @@
-import React, { Component } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+// import ReactFlow, {
+//   addEdge,
+//   MiniMap,
+//   Controls,
+//   Background,
+//   useNodesState,
+//   useEdgesState,
+// } from 'react-flow-renderer';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 import ERC998ERC1155TopDownPresetMinterPauser from "./contracts/ERC998ERC1155TopDownPresetMinterPauser.json";
 // import Item from "./contracts/Item.json";
 import ERC998ERC1155TopDown from "./contracts/ERC998ERC1155TopDown.json";
 import ERC1155PresetMinterPauser from "./contracts/ERC1155PresetMinterPauser.json";
 import getWeb3 from "./getWeb3"; 
 import "./App.css";
+import { nodes as initialNodes, edges as initialEdges } from './initial-elements';
 
 
-class App extends Component {
-    state = {acc_address: 0, tokenID: 0, loaded:false};
-    child = "";
+function App() {
+    
+    const [acc_address, setAccAddr] = useState(0);
+    const [tokenID, setTokenID] = useState(0);
+    const [loaded, setLoaded] = useState(false);
+    const [web3, setWeb3] = useState("undefined");
+    const [accounts, setAccount] = useState("");
+    const [networkId, setNetworkId] = useState("");
+    const [erc998Minter, setERC998Minter] = useState("");
+    const [erc998TD, setERC998TD] = useState("");
+    const [erc1155Minter, setERC1155Minter] = useState("");
+    const [mintParentOpen, setMintParentOpen] = useState(false);
+    const [mintChildOpen, setMintChildOpen] = useState(false);
+    const [numChildTokens, setNumChildTokens] = useState(0);
+    const [tokenName, setTokenName] = useState("");
 
-componentDidMount = async () => { 
-    try {
-        // Get network provider and web3 instance.
-        this.web3 = await getWeb3();
-        // Use web3 to get the user's accounts.
-        this.accounts = await this.web3.eth.getAccounts(); // Get the contract instance.
-        const networkId = await this.web3.eth.net.getId(); 
+
+    //component mount
+    useEffect(() => {
         
-        this.ERC998ERC1155TopDownPresetMinterPauser = new this.web3.eth.Contract(
-            ERC998ERC1155TopDownPresetMinterPauser.abi, 
-            ERC998ERC1155TopDownPresetMinterPauser.networks[networkId] && ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address,
-        );
-
-        this.ERC998ERC1155TopDown = new this.web3.eth.Contract(
-            ERC998ERC1155TopDown.abi,
-            ERC998ERC1155TopDown.networks[networkId] && ERC998ERC1155TopDown.networks[networkId].address,
-        );
-
-        this.ERC1155PresetMinterPauser = new this.web3.eth.Contract(
-            ERC1155PresetMinterPauser.abi,
-            ERC1155PresetMinterPauser.networks[networkId] && ERC1155PresetMinterPauser.networks[networkId].address,
-        );
-
-
+        async function componentDidMount() {
+            await loadContracts();
+        }
             
-        // this.Item = new this.web3.eth.Contract(
-        //     Item.abi,
-        //     Item.networks[networkId] && Item.networks[networkId].address,
-        // );
-        
-        // this.listenToPaymentEvent();
-        this.setState({loaded: true});
+        componentDidMount();
 
-    } 
-        
-    catch (error) {
-        // Catch any errors for any of the above operations.
-        alert(`Failed to load web3, accounts, or contract. Check console for details.`,);
-        console.error(error);
+    }, []);
+
+    async function loadContracts() {
+        try {
+            const web3 = await getWeb3();
+            setWeb3(web3);
+            // Use web3 to get the user's accounts.
+            const accounts = await web3.eth.getAccounts(); // Get the contract instance.
+            setAccount(accounts);
+            const networkId = await web3.eth.net.getId(); 
+            setNetworkId(networkId);
+            
+            const thisERC998ERC1155TopDownPresetMinterPauser = new web3.eth.Contract(
+                ERC998ERC1155TopDownPresetMinterPauser.abi, 
+                ERC998ERC1155TopDownPresetMinterPauser.networks[networkId] && ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address,
+            );
+            setERC998Minter(thisERC998ERC1155TopDownPresetMinterPauser);
+
+            const thisERC998ERC1155TopDown = new web3.eth.Contract(
+                ERC998ERC1155TopDown.abi,
+                ERC998ERC1155TopDown.networks[networkId] && ERC998ERC1155TopDown.networks[networkId].address,
+            );
+            setERC998TD(thisERC998ERC1155TopDown);
+
+            const thisERC1155PresetMinterPauser = new web3.eth.Contract(
+                ERC1155PresetMinterPauser.abi,
+                ERC1155PresetMinterPauser.networks[networkId] && ERC1155PresetMinterPauser.networks[networkId].address,
+            );
+            setERC1155Minter(thisERC1155PresetMinterPauser);
+
+
+                
+            
+            setLoaded(true);
+
+        } catch (error) {
+            alert(`Failed to load web3, accounts, or contract. Check console for details.`,);
+            console.error(error);
+        }
+
     }
-};
 
-mintToken = async () => {
+    const mintToken = async () => {
+            
+       
+        let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
+            from: accounts[0] });
         
-    // console.log("Account 0: ", this.accounts[0]);
-    const { acc_address, tokenID } = this.state;
-    // console.log("ItemManager", this.ItemManager);
-    // console.log(itemName, cost, this.ItemManager);
-    // let a = await this.ERC998ERC1155TopDownPresetMinterPauser.new("erc998", "ERC998", "https://ERC998.com/{id}", { from: this.accounts[0] });
-    // console.log(this.accounts);
-    // console.log(this.ERC998ERC1155TopDownPresetMinterPauser.methods);
-    const networkId = await this.web3.eth.net.getId(); 
-    let a = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-    console.log(a);
-    let result = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.mint(this.accounts[0], tokenID).send({ 
-        from: this.accounts[0] });
-    
-    // let result = await this.ERC998ERC1155TopDown.methods.safeTransferChildFrom(3, "0xf0F0CE990F5ff84a54C3dbaBB51Dfe6DE151A85b", this.accounts[0], 4, 1, "").send({ 
-    //     from: this.accounts[0] });
-    // console.log(a);
-    // let res2 = await this.ERC998ERC1155TopDown.methods.safeTransferChild
-    console.log(result);
-    this.mintChildToken();
-    
-    // alert("Send "+cost+" Wei to "+result.events.SupplyChainStep.returnValues._address);
-    // console.log(result);
-}
+        console.log(result);
+        setMintParentOpen(false);
+    }
 
-mintChildToken = async () => {
-    const { acc_address, tokenID } = this.state;
-    
-    // console.log("ItemManager", this.ItemManager);
-    // console.log(itemName, cost, this.ItemManager);
-    // let a = await this.ERC998ERC1155TopDownPresetMinterPauser.new("erc998", "ERC998", "https://ERC998.com/{id}", { from: this.accounts[0] });
-    // let a = await ERC1155("random", { from: this.accounts[0] });
-   // let a = await ERC1155PresetMinterPauser.new("test", { from: this.accounts[0] });
-    let a = parseInt(tokenID);
-    console.log(a + 1);
-    const networkId = await this.web3.eth.net.getId(); 
-    let addr = ERC1155PresetMinterPauser.networks[networkId].address;
-    let result = await this.ERC1155PresetMinterPauser.methods.mint(this.accounts[0], a + 1, 1, "0x").send({ 
-        from: this.accounts[0] });
-    
-    // console.log(a);
-    // let res2 = await this.ERC998ERC1155TopDown.methods.safeTransferChild
-    console.log(result);
-}
-
-transferToken = async () => {
-    // const { acc_address, tokenID } = this.state;
-    // console.log(this.ERC1155PresetMinterPauser.address);
-    const networkId = await this.web3.eth.net.getId(); 
-    let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
-    console.log(addr_from);
-    let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-    // let result = await this.ERC1155PresetMinterPauser.methods.safeTransferFrom(this.accounts[0], addr_to, 2, 1, this.web3.utils.encodePacked(1)).send({ 
-    //     from: this.accounts[0] });
-
-    let cb = this.ERC998ERC1155TopDownPresetMinterPauser.methods._balances(3, addr_from, 2).call();
-    console.log(cb);
-
-    //let n = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.safeTransferChildFrom(1, addr_to, addr_from, 2, 1, this.web3.utils.encodePacked(3)).send({ from: this.accounts[0]});
-    //console.log(n);
-
-    // 
-    // console.log(result);
-}
-
-handleInputChange = (event) => {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value; const name = target.name;
-    
-    this.setState({
-        [name]: value
-    });
-}
-
-// listenToPaymentEvent = () => {
-//     let self = this;
-//     this.ItemManager.events.SupplyChainStep().on("data", async function(evt){
-    
-//     if (evt.returnValues._step === "1") {
-//         let itemPaid = await self.ItemManager.methods.items(evt.returnValues._itemindex - 1).call();
-//         console.log(itemPaid);
-//         alert("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
-//         console.log("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
+    const mintChildToken = async () => {
         
-//     };
         
-//     console.log(evt);
-//     });
-// }
+        let result = await erc1155Minter.methods.mint(accounts[0], tokenID, 1, "0x").send({ 
+            from: accounts[0] });
+        
+       
+        console.log(result);
+        setMintChildOpen(false);
+    }
+
+    const transferToken = async () => {
+        
+        const networkId = await this.web3.eth.net.getId(); 
+        let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
+        console.log(addr_from);
+        let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+        // let result = await this.ERC1155PresetMinterPauser.methods.safeTransferFrom(this.accounts[0], addr_to, 2, 1, this.web3.utils.encodePacked(1)).send({ 
+        //     from: this.accounts[0] });
+
+        let cb = this.ERC998ERC1155TopDownPresetMinterPauser.methods._balances(3, addr_from, 2).call();
+        console.log(cb);
+
+        //let n = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.safeTransferChildFrom(1, addr_to, addr_from, 2, 1, this.web3.utils.encodePacked(3)).send({ from: this.accounts[0]});
+        //console.log(n);
+
+        // 
+        // console.log(result);
+    }
+
+    const handleInputChange = (event) => {
+        const target = event.target;
+        const value = target.value; 
+        const name = target.name;
+        
+        // this.setState({
+        //     [name]: value
+        // });
+        if(name == "acc_address"){
+            setAccAddr(value);
+        } 
+
+        if(name == "tokenID"){
+            setTokenID(value);
+        }
+
+        if(name == "tokenName"){
+            setTokenName(value);
+        }
+
+        if(name == "numTokens"){
+            setNumChildTokens(value);
+        }
 
 
-render() {
-    if (!this.state.loaded) {
-        return <div>Loading Web3, accounts, and contract...</div>;
-    } 
-    
+    }
+
+    const handleClickOpen = (event) => {
+        const target = event.target;
+        const val = target.value;
+        
+        if(val == "parent"){
+            setMintParentOpen(true);
+        }
+
+        if(val == "child"){
+            setMintChildOpen(true);
+        }
+
+        
+    };
+
+    const handleClose = (event) => {
+        const target = event.target;
+        const val = target.value;
+        
+        if(val == "parent"){
+            setMintParentOpen(false);
+        }
+
+        if(val == "child"){
+            setMintChildOpen(false);
+        }
+    };
+
+    // listenToPaymentEvent = () => {
+    //     let self = this;
+    //     this.ItemManager.events.SupplyChainStep().on("data", async function(evt){
+        
+    //     if (evt.returnValues._step === "1") {
+    //         let itemPaid = await self.ItemManager.methods.items(evt.returnValues._itemindex - 1).call();
+    //         console.log(itemPaid);
+    //         alert("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
+    //         console.log("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
+            
+    //     };
+            
+    //     console.log(evt);
+    //     });
+    // }
+
+
+
+    // render() {
+    //     if (!this.state.loaded) {
+    //         return <div>Loading Web3, accounts, and contract...</div>;
+    //     } 
+
+        
+        
+        
+    // }
+
+    // const onInit = (reactFlowInstance) => console.log('flow loaded:', reactFlowInstance);
+
+    // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+    // const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+
     return (
-        <div className="App">
-            <h1>Simply Payment/Supply Chain Example</h1> <h2>Items</h2>
-            <h2>Items</h2>
-            Account Address: <input type="text" name="acc_address" value={this.state.acc_address} onChange={this.handleInputChange} />
-            Token ID: <input type="text" name="tokenID" value={this.state.tokenID} onChange={this.handleInputChange} />
-            <button type="button" onClick={this.mintToken}>Mint</button><br></br>
-            <button type="button" onClick={this.transferToken}>Transfer</button>
-        </div>
-    ); 
-}
+        // <div className="App" style={{ height: 800 }}>
+        //     <h1>Simply Payment/Supply Chain Example</h1> 
+        //     <h2>Items</h2>
+        //     Account Address: <input type="text" name="acc_address" value={acc_address} onChange={handleInputChange} />
+        //     Token ID: <input type="text" name="tokenID" value={tokenID} onChange={handleInputChange} />
+        //     <button type="button" onClick={mintToken}>Mint</button><br></br>
+        //     <button type="button" onClick={transferToken}>Transfer</button> 
+            
+        // </div>
+        <div>
+            <Button variant="outlined" onClick={handleClickOpen} value="parent">Mint Parent</Button>
+            <Dialog open={mintParentOpen} onClose={handleClose}>
+                <DialogTitle>Mint</DialogTitle>
+                <DialogContent>
+                <DialogContentText>
+                    Please enter a name and tokenId for the creation of this NFT.
+                </DialogContentText>
+                <TextField
+                    required
+                    label="name"
+                    name="tokenName"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="id"
+                    name="tokenID"
+                    onChange={handleInputChange}
+                />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={mintToken}>Mint</Button>
+                </DialogActions>
+            </Dialog>
 
-}
+            <Button variant="outlined" onClick={handleClickOpen} value="child">Mint Child</Button>
+            <Dialog open={mintChildOpen} onClose={handleClose}>
+                <DialogTitle>Mint</DialogTitle>
+                <DialogContent>
+                <DialogContentText>
+                    Please enter a name, tokenId and amount of tokens for the child NFT.
+                </DialogContentText>
+                <TextField
+                    required
+                    label="name"
+                    name="tokenName"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="id"
+                    name="tokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="amount"
+                    name="numTokens"
+                    onChange={handleInputChange}
+                />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={mintChildToken}>Mint</Button>
+                </DialogActions>
+            </Dialog>
+        </div>
+        
+    ); 
+
+};
 
 
 export default App;
