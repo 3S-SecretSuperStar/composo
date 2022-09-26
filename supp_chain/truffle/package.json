@@ -5,7 +5,8 @@
   "main": "truffle-config.js",
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.2",
-    "@truffle/hdwallet-provider": "^2.0.10"
+    "@truffle/hdwallet-provider": "^2.0.10",
+    "truffle": "^5.5.30"
   },
   "scripts": {
     "test": "truffle test"
