@@ -44,24 +44,24 @@ function App() {
         const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
         var blob = new Blob();
         try {
-            //Upload NFT to IPFS & Filecoin
+            
+            // Upload NFT to IPFS & Filecoin
             const metadata = await nftStorage.store({
                 name: 'Harmony NFT collection',
                 description: 'This is a Harmony NFT collenction stored on IPFS & Filecoin.',
                 image: blob,
             });
-            console.log(metadata)
             return metadata;
     
         } catch (error) {
-            //setErrorMessage("Could not save NFT to NFT.Storage - Aborted minting.");
+            // setErrorMessage("Could not save NFT to NFT.Storage - Aborted minting.");
             console.log(error);
         }
     }
 
     // const res = await uploadNFT();
 
-    //component mount
+    // component mount
     useEffect(() => {
         
         async function componentDidMount() {
@@ -103,8 +103,6 @@ function App() {
             setERC1155Minter(thisERC1155PresetMinterPauser);
 
 
-                
-            
             setLoaded(true);
 
         } catch (error) {
@@ -116,7 +114,6 @@ function App() {
 
     const mintToken = async () => {
             
-       
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
             from: accounts[0] });
         
@@ -125,7 +122,6 @@ function App() {
     }
 
     const mintChildToken = async () => {
-        
         
         let result = await erc1155Minter.methods.mint(accounts[0], tokenID, 1, "0x").send({ 
             from: accounts[0] });
@@ -177,8 +173,6 @@ function App() {
         if(name == "numTokens"){
             setNumChildTokens(value);
         }
-
-
     }
 
     const handleClickOpen = (event) => {
@@ -191,9 +185,7 @@ function App() {
 
         if(val == "child"){
             setMintChildOpen(true);
-        }
-
-        
+        }   
     };
 
     const handleClose = (event) => {
