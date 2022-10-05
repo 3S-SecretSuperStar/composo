@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
-// import ReactFlow, {
-//   addEdge,
-//   MiniMap,
-//   Controls,
-//   Background,
-//   useNodesState,
-//   useEdgesState,
-// } from 'react-flow-renderer';
+import ReactFlow, {
+  addEdge,
+  MiniMap,
+  Controls,
+  Background,
+  applyEdgeChanges,
+  applyNodeChanges,
+  ReactFlowProvider,
+} from 'react-flow-renderer';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -24,10 +25,14 @@ import { nodes as initialNodes, edges as initialEdges } from './initial-elements
 import { NFTStorage } from "nft.storage";
 
 
+
+
 function App() {
     
     const [acc_address, setAccAddr] = useState(0);
     const [tokenID, setTokenID] = useState(0);
+    const [parentTokenID, setParentTokenID] = useState(0);
+    const [childTokenID, setChildTokenID] = useState(0);
     const [loaded, setLoaded] = useState(false);
     const [web3, setWeb3] = useState("undefined");
     const [accounts, setAccount] = useState("");
@@ -38,6 +43,7 @@ function App() {
     const [mintParentOpen, setMintParentOpen] = useState(false);
     const [mintChildOpen, setMintChildOpen] = useState(false);
     const [numChildTokens, setNumChildTokens] = useState(0);
+    const [transferChild, setTransferChild] = useState(false);
     const [tokenName, setTokenName] = useState("");
 
     async function uploadNFT() {
@@ -114,34 +120,38 @@ function App() {
 
     const mintToken = async () => {
             
+        setMintParentOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
             from: accounts[0] });
         
         console.log(result);
-        setMintParentOpen(false);
+        // setMintParentOpen(false);
     }
 
     const mintChildToken = async () => {
         
-        let result = await erc1155Minter.methods.mint(accounts[0], tokenID, 1, "0x").send({ 
+        setMintChildOpen(false);
+        let result = await erc1155Minter.methods.mint(accounts[0], tokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
         
        
         console.log(result);
-        setMintChildOpen(false);
+        // transferChildToParent();
+        
     }
 
-    const transferToken = async () => {
+    const transferChildToParent = async () => {
         
-        const networkId = await this.web3.eth.net.getId(); 
+        setTransferChild(false);
+        const networkId = await web3.eth.net.getId(); 
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         console.log(addr_from);
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        // let result = await this.ERC1155PresetMinterPauser.methods.safeTransferFrom(this.accounts[0], addr_to, 2, 1, this.web3.utils.encodePacked(1)).send({ 
-        //     from: this.accounts[0] });
+        let result = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ 
+            from: accounts[0] });
 
-        let cb = this.ERC998ERC1155TopDownPresetMinterPauser.methods._balances(3, addr_from, 2).call();
-        console.log(cb);
+        // let cb = this.ERC998ERC1155TopDownPresetMinterPauser.methods._balances(3, addr_from, 2).call();
+        // console.log(cb);
 
         //let n = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.safeTransferChildFrom(1, addr_to, addr_from, 2, 1, this.web3.utils.encodePacked(3)).send({ from: this.accounts[0]});
         //console.log(n);
@@ -173,6 +183,16 @@ function App() {
         if(name == "numTokens"){
             setNumChildTokens(value);
         }
+
+
+        if(name == "parentTokenID"){
+            setParentTokenID(value);
+        }
+
+        if(name == "childTokenID"){
+            setChildTokenID(value);
+        }
+
     }
 
     const handleClickOpen = (event) => {
@@ -185,12 +205,17 @@ function App() {
 
         if(val == "child"){
             setMintChildOpen(true);
-        }   
+        }
+        
+        if(val == "transfer"){
+            setTransferChild(true);
+        }
     };
 
     const handleClose = (event) => {
         const target = event.target;
         const val = target.value;
+        console.log(val)
         
         if(val == "parent"){
             setMintParentOpen(false);
@@ -199,53 +224,66 @@ function App() {
         if(val == "child"){
             setMintChildOpen(false);
         }
+
+        if(val == "transfer"){
+            setTransferChild(false);
+        }
     };
 
-    // listenToPaymentEvent = () => {
-    //     let self = this;
-    //     this.ItemManager.events.SupplyChainStep().on("data", async function(evt){
-        
-    //     if (evt.returnValues._step === "1") {
-    //         let itemPaid = await self.ItemManager.methods.items(evt.returnValues._itemindex - 1).call();
-    //         console.log(itemPaid);
-    //         alert("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
-    //         console.log("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
-            
-    //     };
-            
-    //     console.log(evt);
-    //     });
-    // }
+   
 
 
 
-    // render() {
-    //     if (!this.state.loaded) {
-    //         return <div>Loading Web3, accounts, and contract...</div>;
-    //     } 
+    
 
-        
-        
-        
-    // }
+    const onInit = (reactFlowInstance) => console.log('flow loaded:', reactFlowInstance);
 
-    // const onInit = (reactFlowInstance) => console.log('flow loaded:', reactFlowInstance);
-
-    // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-    // const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-    // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+    const [nodes, setNodes] = useState([]);
+    const [edges, setEdges] = useState([]);
+    const onNodesChange = useCallback(
+        (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+        [setNodes]
+    );
+    const onEdgesChange = useCallback(
+        (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+        [setEdges]
+    );
+    const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
     return (
-        // <div className="App" style={{ height: 800 }}>
-        //     <h1>Simply Payment/Supply Chain Example</h1> 
-        //     <h2>Items</h2>
-        //     Account Address: <input type="text" name="acc_address" value={acc_address} onChange={handleInputChange} />
-        //     Token ID: <input type="text" name="tokenID" value={tokenID} onChange={handleInputChange} />
-        //     <button type="button" onClick={mintToken}>Mint</button><br></br>
-        //     <button type="button" onClick={transferToken}>Transfer</button> 
-            
-        // </div>
-        <div>
+        
+        // <div>
+        
+        <ReactFlowProvider>
+            <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onInit={onInit}
+                fitView
+                attributionPosition="top-right"
+            >
+                <MiniMap
+                nodeStrokeColor={(n) => {
+                    if (n.style?.background) return n.style.background;
+                    if (n.type === 'input') return '#0041d0';
+                    if (n.type === 'output') return '#ff0072';
+                    if (n.type === 'default') return '#1a192b';
+        
+                    return '#eee';
+                }}
+                nodeColor={(n) => {
+                    if (n.style?.background) return n.style.background;
+        
+                    return '#fff';
+                }}
+                nodeBorderRadius={2}
+                />
+                <Controls />
+                <Background color="#aaa" gap={16} />
+            </ReactFlow>
             <Button variant="outlined" onClick={handleClickOpen} value="parent">Mint Parent</Button>
             <Dialog open={mintParentOpen} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
@@ -267,7 +305,7 @@ function App() {
                 />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleClose} value="parent">Cancel</Button>
                     <Button onClick={mintToken}>Mint</Button>
                 </DialogActions>
             </Dialog>
@@ -299,11 +337,45 @@ function App() {
                 />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleClose} value="child">Cancel</Button>
                     <Button onClick={mintChildToken}>Mint</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+
+            <Button variant="outlined" onClick={handleClickOpen} value="transfer">Transfer Child</Button>
+            <Dialog open={transferChild} onClose={handleClose}>
+                <DialogTitle>Mint</DialogTitle>
+                <DialogContent>
+                <DialogContentText>
+                    Please enter parent token ID you want to transfer the child to.
+                </DialogContentText>
+                <TextField
+                    required
+                    label="Parent ID"
+                    name="parentTokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="Child ID"
+                    name="childTokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="amount"
+                    name="numTokens"
+                    onChange={handleInputChange}
+                />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} value="transfer">Cancel</Button>
+                    <Button onClick={transferChildToParent}>Transfer</Button>
+                </DialogActions>
+            </Dialog>
+        </ReactFlowProvider>
+        //</div>
+        
         
     ); 
 
