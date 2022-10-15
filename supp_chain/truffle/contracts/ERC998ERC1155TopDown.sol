@@ -13,11 +13,12 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import "./IERC998ERC1155TopDown.sol";
 
-contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown {
+contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown, IERC721Receiver {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -86,6 +87,16 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
     }
 
+    function getOwner(uint256 tokenID) external view returns(address){
+        return ownerOf(tokenID);
+    }
+
+    function getMsgSender() external view returns(address){
+        return _msgSender();
+    }
+
+
+
     /**
      * @dev Transfers batch of child tokens from a token ID.
      */
@@ -128,6 +139,23 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         emit ReceivedChild(from, _receiverTokenId, msg.sender, id, amount);
 
         return this.onERC1155Received.selector;
+    }
+
+    /**
+     * @dev Receives a child token, the receiver token ID must be encoded in the
+     * field data.
+     */
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data) virtual public override returns(bytes4) {
+        // require(data.length == 32, "ERC998: data must contain the unique uint256 tokenId to transfer the child token to");
+
+        // uint256 _receiverTokenId;
+        // uint256 _index = msg.data.length;
+        // assembly {_receiverTokenId := calldataload(_index)}
+
+        // _receiveChild(_receiverTokenId, msg.sender, tokenId, 1);
+        // emit ReceivedChild(from, _receiverTokenId, msg.sender, tokenId, 1);
+
+        return this.onERC721Received.selector;
     }
 
     /**
