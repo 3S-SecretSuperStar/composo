@@ -32,6 +32,7 @@ function App() {
     const [acc_address, setAccAddr] = useState(0);
     const [tokenID, setTokenID] = useState(0);
     const [parentTokenID, setParentTokenID] = useState(0);
+    const [parentTokenID2, setParentTokenID2] = useState(0);
     const [childTokenID, setChildTokenID] = useState(0);
     const [loaded, setLoaded] = useState(false);
     const [web3, setWeb3] = useState("undefined");
@@ -131,11 +132,14 @@ function App() {
     const mintChildToken = async () => {
         
         setMintChildOpen(false);
-        let result = await erc1155Minter.methods.mint(accounts[0], tokenID, numChildTokens, "0x").send({ 
+        let result = await erc1155Minter.methods.mint(accounts[0], childTokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
-        
-       
         console.log(result);
+        let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+        let t = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
+        console.log(t);
+       
+        
         // transferChildToParent();
         
     }
@@ -143,21 +147,40 @@ function App() {
     const transferChildToParent = async () => {
         
         setTransferChild(false);
-        const networkId = await web3.eth.net.getId(); 
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         console.log(addr_from);
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let result = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ 
-            from: accounts[0] });
+        // let result = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ 
+        //     from: accounts[0] });
 
-        // let cb = this.ERC998ERC1155TopDownPresetMinterPauser.methods._balances(3, addr_from, 2).call();
-        // console.log(cb);
+        
 
-        //let n = await this.ERC998ERC1155TopDownPresetMinterPauser.methods.safeTransferChildFrom(1, addr_to, addr_from, 2, 1, this.web3.utils.encodePacked(3)).send({ from: this.accounts[0]});
-        //console.log(n);
+        let n = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
+        console.log(n);
+
+        // let o = erc998Minter.methods.getOwner(1).call();
+        // console.log("owner is :", o);
+
+        // let m = erc998Minter.methods.getMsgSender().call();
+        // console.log("msg sender is: ", m);
+
+        // console.log(accounts[0]);
+
+        let cb = erc998Minter.methods._balances(1, addr_from, 2).call();
+        console.log(cb);
 
         // 
         // console.log(result);
+    }
+
+    const mintChild998 = async () => {
+        setMintChildOpen(false);
+        let result = await erc998Minter.methods.mint(accounts[0], childTokenID,).send({ 
+            from: accounts[0] });
+        console.log(result);
+        let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+        let t = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, "0x").send({ from: accounts[0] });
+        console.log(t);
     }
 
     const handleInputChange = (event) => {
@@ -187,6 +210,10 @@ function App() {
 
         if(name == "parentTokenID"){
             setParentTokenID(value);
+        }
+
+        if(name == "parentTokenID2"){
+            setParentTokenID2(value);
         }
 
         if(name == "childTokenID"){
@@ -325,8 +352,14 @@ function App() {
                 />
                 <TextField
                     required
+                    label="parent ID"
+                    name="parentTokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
                     label="id"
-                    name="tokenID"
+                    name="childTokenID"
                     onChange={handleInputChange}
                 />
                 <TextField
@@ -363,8 +396,8 @@ function App() {
                 />
                 <TextField
                     required
-                    label="amount"
-                    name="numTokens"
+                    label="Parent ID 2"
+                    name="parentTokenID2"
                     onChange={handleInputChange}
                 />
                 </DialogContent>
@@ -373,7 +406,47 @@ function App() {
                     <Button onClick={transferChildToParent}>Transfer</Button>
                 </DialogActions>
             </Dialog>
+
+            <Button variant="outlined" onClick={handleClickOpen} value="child">Mint Child 998</Button>
+            <Dialog open={mintChildOpen} onClose={handleClose}>
+                <DialogTitle>Mint</DialogTitle>
+                <DialogContent>
+                <DialogContentText>
+                    Mint Child 998 Token
+                </DialogContentText>
+                <TextField
+                    required
+                    label="name"
+                    name="tokenName"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="parent ID"
+                    name="parentTokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="id"
+                    name="childTokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="amount"
+                    name="numTokens"
+                    onChange={handleInputChange}
+                />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} value="child">Cancel</Button>
+                    <Button onClick={mintChild998}>Mint</Button>
+                </DialogActions>
+            </Dialog>
         </ReactFlowProvider>
+
+
         //</div>
         
         
