@@ -1,0 +1,31 @@
+// ideal js heircarchy schema:
+{
+  "structure": [{
+    "owner_contract_address": {
+          "token_id": "token number",
+          "name": "token name", 
+          "num_tokens": "number of tokens",
+
+          "parent_tokens": [{
+            "contract_address": "parent contract address",
+            "token_id": "parent token id"
+          }],
+
+          "child_tokens": [{
+            "contract_address": "child contract address",
+            "token_id": "child token id"
+          }],
+
+          "description": "description about the NFT.",
+          "properties": {
+              "ownership_stage": "composable asset supply chain stage",
+              "contract_address": "owner contract address", 
+              "image": "image link/Null", 
+              "description": "description about the NFT.",
+              "recycled": "boolean - true/false",
+          }
+    }
+  }] 
+}
+
+// erc-721 metadata storage compliance schema:

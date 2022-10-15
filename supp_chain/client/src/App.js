@@ -1,4 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
+// import * as IPFS from 'ipfs-core'
+// import * as ipns from 'ipns'
+
 // import ReactFlow, {
 //   addEdge,
 //   MiniMap,
@@ -15,7 +18,6 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import ERC998ERC1155TopDownPresetMinterPauser from "./contracts/ERC998ERC1155TopDownPresetMinterPauser.json";
-// import Item from "./contracts/Item.json";
 import ERC998ERC1155TopDown from "./contracts/ERC998ERC1155TopDown.json";
 import ERC1155PresetMinterPauser from "./contracts/ERC1155PresetMinterPauser.json";
 import getWeb3 from "./getWeb3"; 
@@ -24,9 +26,14 @@ import { nodes as initialNodes, edges as initialEdges } from './initial-elements
 import { NFTStorage } from "nft.storage";
 
 
+var ownership_struct = {}
+
+
+
+
 function App() {
     
-    const [acc_address, setAccAddr] = useState(0);
+    const [accAddress, setAccAddr] = useState(0);
     const [tokenID, setTokenID] = useState(0);
     const [loaded, setLoaded] = useState(false);
     const [web3, setWeb3] = useState("undefined");
@@ -47,11 +54,35 @@ function App() {
             
             // Upload NFT to IPFS & Filecoin
             const metadata = await nftStorage.store({
-                name: 'Harmony NFT collection',
-                description: 'This is a Harmony NFT collenction stored on IPFS & Filecoin.',
-                image: blob,
+                token_id: tokenID,
+                owner_address: accAddress,
+                name: tokenName, 
+                image: blob, 
+                description: "description about the NFT.",
+                properties: {
+                    num_child_tokens: numChildTokens,
+                    ownership_stage: "composable asset supply chain stage",
+                    contract_address: "owner contract address", 
+                    recycled: "boolean - true/false",
+              
+                    parent_tokens: [
+                      {
+                        contract_address: "parent contract address",
+                        token_id: "parent token id"
+                      }
+                    ],
+              
+                    child_tokens: [
+                      {
+                        contract_address: "child contract address",
+                        token_id: "child token id"
+                      }
+                    ]
+                }
             });
+
             return metadata;
+              
     
         } catch (error) {
             // setErrorMessage("Could not save NFT to NFT.Storage - Aborted minting.");
@@ -59,15 +90,11 @@ function App() {
         }
     }
 
-    // const res = await uploadNFT();
-
     // component mount
     useEffect(() => {
         
         async function componentDidMount() {
             await loadContracts();
-            let res = await uploadNFT();
-            console.log(res);
         }
             
         componentDidMount();
@@ -118,17 +145,68 @@ function App() {
             from: accounts[0] });
         
         console.log(result);
+
         setMintParentOpen(false);
+        setAccAddr(accounts[0]);
+
+        let res = await uploadNFT();
+        console.log(res);
+
+        var privateKey = "CAESQE+Svy3qn86cPdsjLWX5/hXawvfTaPqT9RXcxmb0VgSs+CD4dmLlVUqhF0gTUR6b5Gl45TMknv9xU4lv41UEGcI=";
+        var value = "/ipfs/" + res.ipnft;
+        var sequenceNumber = 1;
+
+        // 12 hours
+        var lifetime = 3600000 * 12;
+
+        const ipns = require('ipns')
+        const entryData = await ipns.create(privateKey, value, sequenceNumber, lifetime)
+        console.log(entryData)
+
+        // const ipfs = await IPFS.create()
+        // console.log("IPFS: ", ipfs)
+
+        // const ipfs_addr = '/ipfs/' + res.ipnft
+        // console.log("IPFS addr: ", ipfs_addr)
+
+        // ipfs.name.publish(ipfs_addr, setTimeout(200000)).then(function (res) {
+        //     // You now receive a res which contains two fields:
+        //     //   - name: the name under which the content was published.
+        //     //   - value: the IPFS path to which the IPNS name points.
+        //     console.log("yay")
+        //     console.log(`IPNS name: ${res.name}\n value: ${res.value}`)
+        // })
+
+
+        // try {
+        //     console.log("Zyzz")
+        //     const reso = await ipfs.name.publish(ipfs_addr);
+        //     console.log(`https://gateway.ipfs.io/ipns/${reso.name}`)
+        // }
+
+        // catch (error) {
+        //     console.log("eZyzz")
+        //     console.log(error)
+        // }
+
     }
 
     const mintChildToken = async () => {
         
-        let result = await erc1155Minter.methods.mint(accounts[0], tokenID, 1, "0x").send({ 
+        let result = await erc1155Minter.methods.mint(accounts[0], tokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
         
-       
+        
         console.log(result);
+
         setMintChildOpen(false);
+        setAccAddr(accounts[0]);
+
+        // todo: mint ipfs with parent-to-child mapping
+
+        let res = await uploadNFT();
+        console.log(res);
+
     }
 
     const transferToken = async () => {
@@ -158,7 +236,7 @@ function App() {
         // this.setState({
         //     [name]: value
         // });
-        if(name == "acc_address"){
+        if(name == "accAddress"){
             setAccAddr(value);
         } 
 
@@ -201,33 +279,6 @@ function App() {
         }
     };
 
-    // listenToPaymentEvent = () => {
-    //     let self = this;
-    //     this.ItemManager.events.SupplyChainStep().on("data", async function(evt){
-        
-    //     if (evt.returnValues._step === "1") {
-    //         let itemPaid = await self.ItemManager.methods.items(evt.returnValues._itemindex - 1).call();
-    //         console.log(itemPaid);
-    //         alert("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
-    //         console.log("item "+ itemPaid._identifier + " was paid, deliver it now!"); 
-            
-    //     };
-            
-    //     console.log(evt);
-    //     });
-    // }
-
-
-
-    // render() {
-    //     if (!this.state.loaded) {
-    //         return <div>Loading Web3, accounts, and contract...</div>;
-    //     } 
-
-        
-        
-        
-    // }
 
     // const onInit = (reactFlowInstance) => console.log('flow loaded:', reactFlowInstance);
 
@@ -236,15 +287,6 @@ function App() {
     // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
     return (
-        // <div className="App" style={{ height: 800 }}>
-        //     <h1>Simply Payment/Supply Chain Example</h1> 
-        //     <h2>Items</h2>
-        //     Account Address: <input type="text" name="acc_address" value={acc_address} onChange={handleInputChange} />
-        //     Token ID: <input type="text" name="tokenID" value={tokenID} onChange={handleInputChange} />
-        //     <button type="button" onClick={mintToken}>Mint</button><br></br>
-        //     <button type="button" onClick={transferToken}>Transfer</button> 
-            
-        // </div>
         <div>
             <Button variant="outlined" onClick={handleClickOpen} value="parent">Mint Parent</Button>
             <Dialog open={mintParentOpen} onClose={handleClose}>

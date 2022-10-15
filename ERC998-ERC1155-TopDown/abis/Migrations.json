@@ -47,7 +47,7 @@
   "sourceMap": "66:352:26:-:0;;;113:10;90:33;;;;;;;;;;;;;;;;;;;;66:352;5:9:-1;2:2;;;27:1;24;17:12;2:2;66:352:26;;;;;;;",
   "deployedSourceMap": "66:352:26:-:0;;;;5:9:-1;2:2;;;27:1;24;17:12;2:2;66:352:26;;;;;;;;;;;;;;;;;;;;;;;;;;12:1:-1;9;2:12;127:36:26;;;:::i;:::-;;;;;;;;;;;;;;;;;;;90:33;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;313:103;;;;;;15:2:-1;10:3;7:11;4:2;;;31:1;28;21:12;4:2;313:103:26;;;;;;;;;;;;;;;;;:::i;:::-;;127:36;;;;:::o;90:33::-;;;;;;;;;;;;;:::o;313:103::-;225:5;;;;;;;;;;;211:19;;:10;:19;;;196:101;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;402:9:::1;375:24;:36;;;;313:103:::0;:::o",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.4.22 <0.9.0;\n\ncontract Migrations {\n  address public owner = msg.sender;\n  uint public last_completed_migration;\n\n  modifier restricted() {\n    require(\n      msg.sender == owner,\n      \"This function is restricted to the contract's owner\"\n    );\n    _;\n  }\n\n  function setCompleted(uint completed) public restricted {\n    last_completed_migration = completed;\n  }\n}\n",
-  "sourcePath": "/home/prams25/thesisB/composo/ERC998-ERC1155-TopDown/contracts/Migrations.sol",
+  "sourcePath": "/Users/moose/Documents/Projects/composo/ERC998-ERC1155-TopDown/contracts/Migrations.sol",
   "ast": {
     "absolutePath": "project:/contracts/Migrations.sol",
     "exportedSymbols": {
@@ -929,7 +929,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.7",
-  "updatedAt": "2022-08-10T14:36:14.776Z",
+  "updatedAt": "2022-10-15T12:07:11.933Z",
   "devdoc": {
     "methods": {}
   },
