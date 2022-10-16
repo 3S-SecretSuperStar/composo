@@ -146,14 +146,14 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
      * field data.
      */
     function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data) virtual public override returns(bytes4) {
-        // require(data.length == 32, "ERC998: data must contain the unique uint256 tokenId to transfer the child token to");
+        require(data.length == 32, "ERC998: data must contain the unique uint256 tokenId to transfer the child token to");
 
-        // uint256 _receiverTokenId;
-        // uint256 _index = msg.data.length;
-        // assembly {_receiverTokenId := calldataload(_index)}
+        uint256 _receiverTokenId;
+        uint256 _index = msg.data.length - 32;
+        assembly {_receiverTokenId := calldataload(_index)}
 
-        // _receiveChild(_receiverTokenId, msg.sender, tokenId, 1);
-        // emit ReceivedChild(from, _receiverTokenId, msg.sender, tokenId, 1);
+        _receiveChild(_receiverTokenId, msg.sender, tokenId, 1);
+        emit ReceivedChild(from, _receiverTokenId, msg.sender, tokenId, 1);
 
         return this.onERC721Received.selector;
     }
