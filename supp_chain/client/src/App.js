@@ -22,9 +22,74 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 import { nodes as initialNodes, edges as initialEdges } from './initial-elements';
 import { NFTStorage } from "nft.storage";
+import { integerPropType } from "@mui/utils";
 
 
-var ownership_struct = {}
+//composable dict structure
+// var composable = {
+//     [owner_addr]: {
+//         [tokenID]: {
+//                "metadata": ipns_link, 
+//                "parents": [parent_addr, parent_token], 
+//                "children": [child_addr, child_token]]   
+//          }
+//     }
+// };
+
+// *** how to show minted tokens on Metamask account?
+
+// owner can be either an eth address or a contract address:
+// 1. the owner of the token - an ethereum account address
+// 2. the owner of the token - an ERC-998 token
+
+
+// token onwership states:
+// 1. minted, and no child and parent is an eth account 
+        // root token: 
+        // generate + save token ipfs in dict
+// 2. minted, and transferred as a child to another token 
+        // child token: 
+        // generate + save child ipfs with corr. parent addr and token
+        // generate new parent ipfs with corr. child addr and token
+        // update parent ipfs in dict
+
+
+var composable = {};
+
+// update ipfs link of token
+
+function update_ipfs_link(owner_addr, tokenID, ipfs_link) {
+    if (!composable[owner_addr]) composable[owner_addr] = {};
+    if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
+    composable[owner_addr][tokenID]["metadata"] = ipfs_link;
+
+    console.log("composable ownership structure: ", composable);
+
+}
+
+// updated parents of token
+
+function update_parents(owner_acc_addr, tokenID, parent_addr, parent_tokenID) {
+    if (!composable[owner_acc_addr]) composable[owner_acc_addr] = {};
+    if (!composable[owner_acc_addr][tokenID]) composable[owner_acc_addr][tokenID] = {};
+    composable[owner_acc_addr][tokenID]["parents"] = [parent_addr, parent_tokenID];
+
+    console.log("composable ownership structure: ", composable);
+
+}
+
+// update children of token
+
+function update_children(owner_acc_addr, tokenID, child_addr, child_tokenID) {
+    if (!composable[owner_acc_addr]) composable[owner_acc_addr] = {};
+    if (!composable[owner_acc_addr][tokenID]) composable[owner_acc_addr][tokenID] = {};
+    composable[owner_acc_addr][tokenID]["children"] = [child_addr, child_tokenID];
+
+    console.log("composable ownership structure: ", composable);
+
+}
+
+
 
 function App() {
     
@@ -139,17 +204,26 @@ function App() {
     }
 
     const mintToken = async () => {
-            
+        console.log("Minting 998-parent token...");
         setMintParentOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
             from: accounts[0] });
         
         console.log(result);
+
+        var metadata = await uploadNFT();
+
+        let o = await erc998Minter.methods.getOwner(tokenID).call();
+        console.log("owner of token is :", o);
+        
+        // console.log("IPFS link: ", metadata.url);
+        update_ipfs_link(accounts[0], tokenID, metadata.url);
+
         // setMintParentOpen(false);
     }
 
     const mintChildToken = async () => {
-        
+        console.log("Minting 1155-child token...");
         setMintChildOpen(false);
         let result = await erc1155Minter.methods.mint(accounts[0], childTokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
@@ -157,14 +231,16 @@ function App() {
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
         let t = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         console.log(t);
-       
+
+        let o = await erc998Minter.methods.getOwner(childTokenID).call();
+        console.log("owner of child is :", o);
         
         // transferChildToParent();
         
     }
 
     const transferChildToParent = async () => {
-        
+        console.log("Transferring 1155-child token...");
         setTransferChild(false);
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         console.log(addr_from);
@@ -172,6 +248,7 @@ function App() {
         // let result = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ 
         //     from: accounts[0] });
 
+        // console.log(result);
         
 
         let n = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
@@ -188,8 +265,13 @@ function App() {
         let cb = erc998Minter.methods._balances(1, addr_from, 2).call();
         console.log(cb);
 
-        // 
-        // console.log(result);
+        // generate ipfs link of child w parent addr + token
+            // update_ipfs_link(accounts[0], tokenID, metadata.url);
+        // generate new ipfs link of parent w child addr + token, 
+            // uploadnft()....
+            // update_ipfs_link(parent_acc_addr, tokenID, metadata.url);
+            // update_children(parent_acc_addr, parent_tokenID, child_addr, child_tokenID));
+
     }
 
     const mintChild998 = async () => {
@@ -200,6 +282,13 @@ function App() {
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
         let t = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, "0x").send({ from: accounts[0] });
         console.log(t);
+
+        // generate ipfs link of child w parent addr + token
+            // update_ipfs_link(accounts[0], tokenID, metadata.url);
+        // generate new ipfs link of parent w child addr + token, 
+            // uploadnft()....
+            // update_ipfs_link(parent_acc_addr, tokenID, metadata.url);
+            // update_children(parent_acc_addr, parent_tokenID, child_addr, child_tokenID));
     }
 
     const handleInputChange = (event) => {
@@ -210,32 +299,33 @@ function App() {
         // this.setState({
         //     [name]: value
         // });
-        if(name == "accAddress"){
+        if(name === "accAddress"){
             setAccAddr(value);
         } 
 
-        if(name == "tokenID"){
+        if(name === "tokenID"){
             setTokenID(value);
         }
 
-        if(name == "tokenName"){
+        if(name === "tokenName"){
             setTokenName(value);
         }
 
-        if(name == "numTokens"){
+        if(name === "numTokens"){
             setNumChildTokens(value);
         }
 
 
-        if(name == "parentTokenID"){
+        if(name === "parentTokenID"){
             setParentTokenID(value);
         }
 
-        if(name == "parentTokenID2"){
+        if(name === "parentTokenID2"){
             setParentTokenID2(value);
         }
 
-        if(name == "childTokenID"){
+
+        if(name === "childTokenID"){
             setChildTokenID(value);
         }
 
@@ -245,15 +335,15 @@ function App() {
         const target = event.target;
         const val = target.value;
         
-        if(val == "parent"){
+        if(val === "parent"){
             setMintParentOpen(true);
         }
 
-        if(val == "child"){
+        if(val === "child"){
             setMintChildOpen(true);
         }
         
-        if(val == "transfer"){
+        if(val === "transfer"){
             setTransferChild(true);
         }
     };
@@ -263,73 +353,24 @@ function App() {
         const val = target.value;
         console.log(val)
         
-        if(val == "parent"){
+        if(val === "parent"){
             setMintParentOpen(false);
         }
 
-        if(val == "child"){
+        if(val === "child"){
             setMintChildOpen(false);
         }
 
-        if(val == "transfer"){
+        if(val === "transfer"){
             setTransferChild(false);
         }
     };
 
    
 
-
-
-    
-
-    const onInit = (reactFlowInstance) => console.log('flow loaded:', reactFlowInstance);
-
-    const [nodes, setNodes] = useState([]);
-    const [edges, setEdges] = useState([]);
-    const onNodesChange = useCallback(
-        (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-        [setNodes]
-    );
-    const onEdgesChange = useCallback(
-        (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-        [setEdges]
-    );
-    const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
-
     return (
         
-        // <div>
-        
-        <ReactFlowProvider>
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onInit={onInit}
-                fitView
-                attributionPosition="top-right"
-            >
-                <MiniMap
-                nodeStrokeColor={(n) => {
-                    if (n.style?.background) return n.style.background;
-                    if (n.type === 'input') return '#0041d0';
-                    if (n.type === 'output') return '#ff0072';
-                    if (n.type === 'default') return '#1a192b';
-        
-                    return '#eee';
-                }}
-                nodeColor={(n) => {
-                    if (n.style?.background) return n.style.background;
-        
-                    return '#fff';
-                }}
-                nodeBorderRadius={2}
-                />
-                <Controls />
-                <Background color="#aaa" gap={16} />
-            </ReactFlow>
+        <div>
             <Button variant="outlined" onClick={handleClickOpen} value="parent">Mint Parent</Button>
             <Dialog open={mintParentOpen} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
@@ -339,13 +380,13 @@ function App() {
                 </DialogContentText>
                 <TextField
                     required
-                    label="name"
+                    label="Token name"
                     name="tokenName"
                     onChange={handleInputChange}
                 />
                 <TextField
                     required
-                    label="id"
+                    label="Token ID"
                     name="tokenID"
                     onChange={handleInputChange}
                 />
@@ -365,25 +406,25 @@ function App() {
                 </DialogContentText>
                 <TextField
                     required
-                    label="name"
+                    label="Token name"
                     name="tokenName"
                     onChange={handleInputChange}
                 />
                 <TextField
                     required
-                    label="parent ID"
-                    name="parentTokenID"
-                    onChange={handleInputChange}
-                />
-                <TextField
-                    required
-                    label="id"
+                    label="Token ID"
                     name="childTokenID"
                     onChange={handleInputChange}
                 />
                 <TextField
                     required
-                    label="amount"
+                    label="Parent ID"
+                    name="parentTokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="Amount of tokens"
                     name="numTokens"
                     onChange={handleInputChange}
                 />
@@ -415,7 +456,7 @@ function App() {
                 />
                 <TextField
                     required
-                    label="Parent ID 2"
+                    label="Parent ID to transfer to"
                     name="parentTokenID2"
                     onChange={handleInputChange}
                 />
@@ -435,25 +476,25 @@ function App() {
                 </DialogContentText>
                 <TextField
                     required
-                    label="name"
+                    label="Token name"
                     name="tokenName"
                     onChange={handleInputChange}
                 />
                 <TextField
                     required
-                    label="parent ID"
+                    label="Parent ID"
                     name="parentTokenID"
                     onChange={handleInputChange}
                 />
                 <TextField
                     required
-                    label="id"
+                    label="Child ID"
                     name="childTokenID"
                     onChange={handleInputChange}
                 />
                 <TextField
                     required
-                    label="amount"
+                    label="Amount of tokens"
                     name="numTokens"
                     onChange={handleInputChange}
                 />
@@ -463,10 +504,7 @@ function App() {
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
-        </ReactFlowProvider>
-
-
-        //</div>
+        </div>
         
         
     ); 
