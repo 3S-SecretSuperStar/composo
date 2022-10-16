@@ -235,7 +235,6 @@ function App() {
         let o = await erc998Minter.methods.getOwner(childTokenID).call();
         console.log("owner of child is :", o);
         
-        // transferChildToParent();
         
     }
 
@@ -274,7 +273,11 @@ function App() {
 
     }
 
+    // *** which 998 is the parent to set as the parent of the child
+    // rn child 998 is transferrred to 988 minter smart contract
+
     const mintChild998 = async () => {
+        console.log("Minting 998-child token...");
         setMintChildOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], childTokenID,).send({ 
             from: accounts[0] });
