@@ -279,12 +279,18 @@ function App() {
 
     const mintChild998 = async () => {
         setMintChild998Open(false);
-        let result = await erc998Minter.methods.mint(accounts[0], childTokenID,).send({ 
+        let result = await erc998Minter.methods.mint(accounts[0], childTokenID).send({ 
             from: accounts[0] });
         console.log(result);
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let t = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, "0x").send({ from: accounts[0] });
+        let t = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         console.log(t);
+
+        // let x = web3.utils.encodePacked(parentTokenID);
+        // console.log(x.length);
+
+        let o = await erc998Minter.methods.childBalance(parentTokenID, ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address, childTokenID).call();
+        console.log("child balance is:", o);
 
         // generate ipfs link of child w parent addr + token
             // update_ipfs_link(accounts[0], tokenID, metadata.url);
@@ -478,7 +484,7 @@ function App() {
                 </DialogActions>
             </Dialog>
 
-            <Button variant="outlined" onClick={handleClickOpen} value="child988">Mint Child 998</Button>
+            <Button variant="outlined" onClick={handleClickOpen} value="child998">Mint Child 998</Button>
             <Dialog open={mintChild998Open} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
@@ -511,7 +517,7 @@ function App() {
                 />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} value="child">Cancel</Button>
+                    <Button onClick={handleClose} value="child998">Cancel</Button>
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
