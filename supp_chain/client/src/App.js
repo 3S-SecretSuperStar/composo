@@ -107,6 +107,7 @@ function App() {
     const [erc1155Minter, setERC1155Minter] = useState("");
     const [mintParentOpen, setMintParentOpen] = useState(false);
     const [mintChildOpen, setMintChildOpen] = useState(false);
+    const [mintChild998Open, setMintChild998Open] = useState(false);
     const [numChildTokens, setNumChildTokens] = useState(0);
     const [transferChild, setTransferChild] = useState(false);
     const [tokenName, setTokenName] = useState("");
@@ -277,8 +278,7 @@ function App() {
     // rn child 998 is transferrred to 988 minter smart contract
 
     const mintChild998 = async () => {
-        console.log("Minting 998-child token...");
-        setMintChildOpen(false);
+        setMintChild998Open(false);
         let result = await erc998Minter.methods.mint(accounts[0], childTokenID,).send({ 
             from: accounts[0] });
         console.log(result);
@@ -349,6 +349,10 @@ function App() {
         if(val === "transfer"){
             setTransferChild(true);
         }
+
+        if(val === "child998"){
+            setMintChild998Open(true);
+        }
     };
 
     const handleClose = (event) => {
@@ -366,6 +370,10 @@ function App() {
 
         if(val === "transfer"){
             setTransferChild(false);
+        }
+
+        if(val === "child998"){
+            setMintChild998Open(false);
         }
     };
 
@@ -470,8 +478,8 @@ function App() {
                 </DialogActions>
             </Dialog>
 
-            <Button variant="outlined" onClick={handleClickOpen} value="child">Mint Child 998</Button>
-            <Dialog open={mintChildOpen} onClose={handleClose}>
+            <Button variant="outlined" onClick={handleClickOpen} value="child988">Mint Child 998</Button>
+            <Dialog open={mintChild998Open} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
