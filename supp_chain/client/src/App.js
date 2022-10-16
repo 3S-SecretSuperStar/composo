@@ -230,7 +230,7 @@ function App() {
             from: accounts[0] });
         console.log(result);
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let t = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
+        let t = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, numChildTokens, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         console.log(t);
 
         let o = await erc998Minter.methods.getOwner(childTokenID).call();
@@ -278,6 +278,7 @@ function App() {
     // rn child 998 is transferrred to 988 minter smart contract
 
     const mintChild998 = async () => {
+        console.log("Minting 998-child token...");
         setMintChild998Open(false);
         let result = await erc998Minter.methods.mint(accounts[0], childTokenID,).send({ 
             from: accounts[0] });
@@ -429,7 +430,7 @@ function App() {
                 />
                 <TextField
                     required
-                    label="Parent ID"
+                    label="Parent token ID"
                     name="parentTokenID"
                     onChange={handleInputChange}
                 />
@@ -455,7 +456,7 @@ function App() {
                 </DialogContentText>
                 <TextField
                     required
-                    label="Parent ID"
+                    label="Parent token ID"
                     name="parentTokenID"
                     onChange={handleInputChange}
                 />
@@ -493,13 +494,13 @@ function App() {
                 />
                 <TextField
                     required
-                    label="Parent ID"
+                    label="Parent token ID"
                     name="parentTokenID"
                     onChange={handleInputChange}
                 />
                 <TextField
                     required
-                    label="Child ID"
+                    label="Child token ID"
                     name="childTokenID"
                     onChange={handleInputChange}
                 />
