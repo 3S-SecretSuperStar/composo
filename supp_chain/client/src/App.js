@@ -226,15 +226,17 @@ function App() {
     const mintChildToken = async () => {
         console.log("Minting 1155-child token...");
         setMintChildOpen(false);
+        console.log(numChildTokens);
         let result = await erc1155Minter.methods.mint(accounts[0], childTokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
         console.log(result);
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let t = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
+        let t = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, numChildTokens, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         console.log(t);
 
-        let o = await erc998Minter.methods.getOwner(childTokenID).call();
-        console.log("owner of child is :", o);
+        
+        let o = await erc998Minter.methods.childBalance(parentTokenID, ERC1155PresetMinterPauser.networks[networkId].address, childTokenID).call();
+        console.log("child balance is:", o);
         
         // transferChildToParent();
         
