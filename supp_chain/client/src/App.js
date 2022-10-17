@@ -135,7 +135,7 @@ async function update_child_ipfs(parentAcc, parentTokenID, childAcc, childTokenI
 
 // update parent ipfs and dictionary mapping
 async function update_parent(parentAcc, parentTokenID, childAcc, childTokenID) {
-        update_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID);
+        await update_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID);
         update_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID);
 
         return true;
@@ -144,7 +144,7 @@ async function update_parent(parentAcc, parentTokenID, childAcc, childTokenID) {
 
 // update child ipfs and dictionary mapping
 async function update_child(parentAcc, parentTokenID, childAcc, childTokenID) {
-    update_child_ipfs(parentAcc, parentTokenID, childAcc, childTokenID);
+    await update_child_ipfs(parentAcc, parentTokenID, childAcc, childTokenID);
     update_parent_mapping(parentAcc, parentTokenID, childAcc, childTokenID);
 
     return true;
