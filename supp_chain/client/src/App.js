@@ -101,6 +101,11 @@ function get_composable_structure() {
 
 // ---------------------- IPFS functions ----------------------
 
+function get_ipfs_link(acc, tokenID) {
+    return composable[acc][tokenID]["metadata"];
+}
+
+
 // update ipfs link of token
 function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
@@ -186,12 +191,6 @@ async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, 
 
 
 
-function get_ipfs_link(acc, tokenID) {
-    return composable[acc][tokenID]["metadata"];
-}
-
-
-
 // ---------------------- MAPPING functions ----------------------
 
 // update parents of a token
@@ -248,6 +247,11 @@ async function update_parent(parentAcc, parentTokenID, childAcc, childTokenID, c
     parent_to_update();
 
     if (childTokens) {
+        console.log("parentacc: ", parentAcc);
+        console.log("parenttokenid: ", parentTokenID);
+        console.log("childacc: ", childAcc);
+        console.log("childtokenid: ", childTokenID);
+        console.log("childtokens: ", childTokens);
         await add_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
         add_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
     }
@@ -303,6 +307,8 @@ async function updateNFT(metadata) {
 
 // -------------------------------------------------------------------------------
     
+
+
 function App() {
     const [tokenID, setTokenID] = useState(0);
     const [parentTokenID, setParentTokenID] = useState(0);
@@ -516,7 +522,8 @@ function App() {
             
         var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
         var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
-        var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
+        var childAcc = await erc998Minter.methods.getChildContract(parentTokenID2, childTokenID).call();
+        console.log("childAcc in transfer: ", childAcc);
        
 
         var res1 = await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, 0);
