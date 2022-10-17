@@ -95,6 +95,10 @@ function setNumTokens(num) {
     numTokens = num;
 }
 
+function get_composable_structure() {
+    return composable;
+}
+
 // ---------------------- IPFS functions ----------------------
 
 // update ipfs link of token
@@ -140,7 +144,10 @@ async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, childToken
     var metadata = await $.getJSON(url)
 
     // update metadata to remove child token
-    metadata["properties"]["child_tokens"].splice({"contract_address": childAcc, "token_id": childTokenID, "num_tokens": metadata["properties"]["child_tokens"][childTokenID]["num_tokens"]}, 1);
+    var child_tokens = metadata["properties"]["child_tokens"];
+    var index = child_tokens.findIndex(x => x.contract_address === childAcc && x.token_id === childTokenID);
+    child_tokens.splice(index, 1);
+    
 
     console.log ("generating updated parent's ipfs...");
     var updated = await updateNFT(metadata);
@@ -155,12 +162,17 @@ async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, childToken
 async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID) {
 
     console.log("updating child's ipfs data...");
+    console.log("Composable: ", get_composable_structure());
     var url = get_ipfs_link(childAcc, childTokenID);
 
     var metadata = await $.getJSON(url)
 
     // update metadata to remove parent token 1
-    metadata["properties"]["parent_tokens"].splice({"contract_address": parentAcc, "token_id": parentTokenID}, 1);
+    try {
+        metadata["properties"]["parent_tokens"].splice({"contract_address": parentAcc, "token_id": parentTokenID}, 1);
+    } catch (error) {
+        console.log("Error in trying to remove parentTokenID1 from child token ipfs metadata.");
+    }
 
     // update metadata to include parent token 2
     metadata["properties"]["parent_tokens"].push({"contract_address": parentAcc2, "token_id": parentTokenID2});
@@ -174,9 +186,8 @@ async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, 
 
 
 
-function get_ipfs_link(parentAcc, parentTokenID) {
-
-    return composable[parentAcc][parentTokenID]["metadata"];
+function get_ipfs_link(acc, tokenID) {
+    return composable[acc][tokenID]["metadata"];
 }
 
 
@@ -260,10 +271,6 @@ async function update_transferred_child(parentAcc, parentTokenID, parentAcc2, pa
     return true;
 }
 
-function get_composable_structure() {
-    return composable;
-}
-
 
 async function updateNFT(metadata) {
     const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
@@ -278,18 +285,11 @@ async function updateNFT(metadata) {
                 description: "description about the NFT.",
                 image: blob,
                 properties: {
-                    num_child_tokens: metadata["properties"]["num_child_tokens"],
                     ownership_stage: "composable asset supply chain stage",
                     contract_address: "owner contract address", 
                     recycled: "boolean - true/false",
-              
-                    parent_tokens: [
-                        metadata["properties"]["parent_tokens"]
-                    ],
-              
-                    child_tokens: [
-                        metadata["properties"]["child_tokens"]
-                    ]
+                    parent_tokens: metadata["properties"]["parent_tokens"],
+                    child_tokens: metadata["properties"]["child_tokens"],
                 }
             });
 
@@ -299,6 +299,9 @@ async function updateNFT(metadata) {
             console.log(error);
         }
 }
+
+
+// -------------------------------------------------------------------------------
     
 function App() {
     const [tokenID, setTokenID] = useState(0);
@@ -493,12 +496,12 @@ function App() {
 
         if (res) {
             setNullState();
-            console.log("IPFS of parent and mapping of child to parent updated!");
+            console.log("IPFS mappings updated!");
             console.log("Composable structure: ", get_composable_structure());
         }
 
         else {
-            console.log("Error updating parent and child mapping.");
+            console.log("Error updating mapping.");
         }
         
     }
@@ -510,21 +513,28 @@ function App() {
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
         let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
         console.log(result);
-
-        
-        // update parent1 token metadata
-            // remove child1 from parent1 in dict
             
         var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
         var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
         var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
        
 
-        await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, 0);
-        await update_parent(parentAcc2, parentTokenID2, childAcc, childTokenID, 1);
-    
-        update_transferred_child(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID);
+        var res1 = await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, 0);
+        var res2 = await update_parent(parentAcc2, parentTokenID2, childAcc, childTokenID, 1);
 
+        if (res1 && res2) {
+            var res3 = await update_transferred_child(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID);
+        }
+
+        if (res3) {
+            setNullState();
+            console.log("IPFS mappings updated!");
+            console.log("Composable structure: ", get_composable_structure());
+        }
+
+        else {
+            console.log("Error updating mapping.");
+        }
     }
 
     const mintChild998 = async () => {

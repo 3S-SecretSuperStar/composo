@@ -30,29 +30,44 @@
 
 // erc-721 metadata storage compliance schema:
 const metadata = await nftStorage.store({
-  token_id: tokenID,
-  owner_address: accounts[0],
+  token_id: token_id,
+  owner_address: owner_address,
   name: tokenName, 
-  image: blob, 
   description: "description about the NFT.",
+  image: blob,
   properties: {
-      num_child_tokens: numChildTokens,
       ownership_stage: "composable asset supply chain stage",
       contract_address: "owner contract address", 
       recycled: "boolean - true/false",
 
       parent_tokens: [
         {
-          contract_address: "parent contract address",
-          token_id: parentTokenID,
+          contract_address: p_contract_addr,
+          token_id: p_token_id,
         }
       ],
 
       child_tokens: [
         {
-          contract_address: "child contract address",
-          token_id: childTokenID,
+          contract_address: c_contract_addr,
+          token_id: c_token_id,
+          num_tokens: numTokens,
         }
       ]
+  }
+
+// schema for updating existing metadata:
+const updated_metadata = await nftStorage.store({
+  token_id: metadata["token_id"],
+  owner_address: metadata["owner_address"],
+  name: metadata["name"], 
+  description: "description about the NFT.",
+  image: blob,
+  properties: {
+      ownership_stage: "composable asset supply chain stage",
+      contract_address: "owner contract address", 
+      recycled: "boolean - true/false",
+      parent_tokens: metadata["properties"]["parent_tokens"]
+      child_tokens: metadata["properties"]["child_tokens"]
   }
 });
