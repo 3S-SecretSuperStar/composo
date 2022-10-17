@@ -345,7 +345,7 @@ function App() {
 
         var metadata = await uploadNFT();    
         var parentAcc = await erc998Minter.methods.getOwner(parentTokenID).call();
-        var childAcc = await erc1155Minter.methods.getOwner(childTokenID).call();
+        var childAcc = await erc998Minter.methods.getOwner(parentTokenID).call();
 
         // generate ipfs link of child w parent addr + token
         update_ipfs(addr_to, childTokenID, metadata.url);
