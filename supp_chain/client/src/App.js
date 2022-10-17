@@ -95,6 +95,8 @@ function setNumTokens(num) {
     numTokens = num;
 }
 
+// ---------------------- IPFS functions ----------------------
+
 // update ipfs link of token
 function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
@@ -109,8 +111,80 @@ function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
 }
 
+
+// update parent ipfs link to include child token
+// update ipfs dictionary mapping
+async function add_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens) {
+
+    console.log("updating parent's ipfs data...");
+    var url = get_ipfs_link(parentAcc, parentTokenID);
+    
+    var metadata = await $.getJSON(url)
+
+    // update metadata to include child token
+    metadata["properties"]["child_tokens"].push({"contract_address": childAcc, "token_id": childTokenID, "num_tokens": childTokens});
+
+    console.log ("generating updated parent's ipfs...");
+    var updated = await updateNFT(metadata);
+    console.log ("updated parent ipfs.");
+
+    update_ipfs(parentAcc, parentTokenID, updated.url);
+}
+
+
+async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID) {
+
+    console.log("updating parent's ipfs data...");
+    var url = get_ipfs_link(parentAcc, parentTokenID);
+    
+    var metadata = await $.getJSON(url)
+
+    // update metadata to remove child token
+    metadata["properties"]["child_tokens"].splice({"contract_address": childAcc, "token_id": childTokenID, "num_tokens": metadata["properties"]["child_tokens"][childTokenID]["num_tokens"]}, 1);
+
+    console.log ("generating updated parent's ipfs...");
+    var updated = await updateNFT(metadata);
+    console.log ("updated parent ipfs.");
+
+    update_ipfs(parentAcc, parentTokenID, updated.url);
+}
+
+
+// update child ipfs link to remove parent token 2
+// update child ipfs link to include parent token 2
+async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID) {
+
+    console.log("updating child's ipfs data...");
+    var url = get_ipfs_link(childAcc, childTokenID);
+
+    var metadata = await $.getJSON(url)
+
+    // update metadata to remove parent token 1
+    metadata["properties"]["parent_tokens"].splice({"contract_address": parentAcc, "token_id": parentTokenID}, 1);
+
+    // update metadata to include parent token 2
+    metadata["properties"]["parent_tokens"].push({"contract_address": parentAcc2, "token_id": parentTokenID2});
+
+    console.log ("generating updated child's ipfs...");
+    var updated = await updateNFT(metadata);
+    console.log ("updated child ipfs.");
+
+    update_ipfs(childAcc, childTokenID, updated.url);
+}
+
+
+
+function get_ipfs_link(parentAcc, parentTokenID) {
+
+    return composable[parentAcc][parentTokenID]["metadata"];
+}
+
+
+
+// ---------------------- MAPPING functions ----------------------
+
 // update parents of a token
-function update_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
+function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
     if (!composable[owner_addr]) composable[owner_addr] = {};
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
     if (!composable[owner_addr][tokenID]["parents"]) composable[owner_addr][tokenID]["parents"] = [];
@@ -120,8 +194,17 @@ function update_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID)
 
 }
 
+function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
+    try {
+        composable[owner_addr][tokenID]["parents"].splice([parent_addr, parent_tokenID], 1);
+    }
+    catch {
+        console.log("error removing parent mapping.");
+    }
+}
+
 // update children of a token
-function update_children_mapping(owner_addr, tokenID, child_addr, child_tokenID, child_tokens) {
+function add_children_mapping(owner_addr, tokenID, child_addr, child_tokenID, child_tokens) {
     if (!composable[owner_addr]) composable[owner_addr] = {};
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
     if (!composable[owner_addr][tokenID]["children"]) composable[owner_addr][tokenID]["children"] = [];
@@ -131,66 +214,50 @@ function update_children_mapping(owner_addr, tokenID, child_addr, child_tokenID,
 
 }
 
-
-// update parent ipfs link to include child token
-// update ipfs dictionary mapping
-async function update_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens) {
-
-        console.log("updating parent's ipfs data...");
-        var url = get_ipfs_link(parentAcc, parentTokenID);
-        
-        var metadata = await $.getJSON(url)
-
-        // update metadata to include child token
-        metadata["properties"]["child_tokens"].push({"contract_address": childAcc, "token_id": childTokenID, "num_tokens": childTokens});
-
-        console.log ("generating updated parent's ipfs...");
-        var updated = await updateNFT(metadata);
-        console.log ("updated parent ipfs.");
-
-        update_ipfs(parentAcc, parentTokenID, updated.url);
+function remove_children_mapping(owner_addr, tokenID, child_addr, child_tokenID) {
+    try {
+        var index = composable[owner_addr][tokenID]["children"].indexOf([child_addr, child_tokenID]);
+        composable[owner_addr][tokenID]["children"].splice(index, 1);
+        console.log("removed token's children.");
+    }
+    catch {
+        console.log("error removing child mapping.");
+    }
 }
 
-// update child ipfs link to include parent token
-// update ipfs dictionary mapping
-async function update_child_ipfs(parentAcc, parentTokenID, childAcc, childTokenID) {
 
-    console.log("updating child's ipfs data...");
-    var url = get_ipfs_link(childAcc, childTokenID);
-    
-    var metadata = await $.getJSON(url)
+// ---------------------- UPDATION functions ----------------------
 
-    // update metadata to include parent token
-    metadata["properties"]["parent_tokens"].push({"contract_address": parentAcc, "token_id": parentTokenID});
 
-    console.log ("generating updated child's ipfs...");
-    var updated = await updateNFT(metadata);
-    console.log ("updated child ipfs.");
-
-    update_ipfs(childAcc, childTokenID, updated.url);
-}
-
-// update parent ipfs and dictionary mapping
+// update parent ipfs and dictionary mapping 
+// 0 child tokens -- remove mapping
+// 1+ child tokens -- add/update mapping
 async function update_parent(parentAcc, parentTokenID, childAcc, childTokenID, childTokens) {
-        parent_to_update();
-        await update_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
-        update_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
+        
+    parent_to_update();
 
-        return true;
-}
+    if (childTokens) {
+        await add_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
+        add_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
+    }
 
-
-// update child ipfs and dictionary mapping
-async function update_child(parentAcc, parentTokenID, childAcc, childTokenID) {
-    await update_child_ipfs(parentAcc, parentTokenID, childAcc, childTokenID);
-    update_parent_mapping(parentAcc, parentTokenID, childAcc, childTokenID);
+    else {
+        await remove_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID);
+        remove_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID);
+    }
 
     return true;
 }
 
-function get_ipfs_link(parentAcc, parentTokenID) {
+// update child ipfs and dictionary mapping
+async function update_transferred_child(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID) {
+    
+    child_to_update();
+    await update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID);
+    remove_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
+    add_parent_mapping(childAcc, childTokenID, parentAcc2, parentTokenID2);
 
-    return composable[parentAcc][parentTokenID]["metadata"];
+    return true;
 }
 
 function get_composable_structure() {
@@ -419,7 +486,7 @@ function App() {
 
         // save ipfs link of child w parent addr + token mapping
         update_ipfs(childAcc, childTokenID, metadata.url);
-        update_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
+        add_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
     
         // update parent token metadata
         var res = await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, numTokens);
@@ -437,37 +504,26 @@ function App() {
     }
 
     const transferChildToParent = async () => {
-        console.log("Transferring 1155-child token to 988...");
+        console.log("Transferring 998/1155-child token from parentTokenID to parentTokenID2 in the 988 contract...");
         setTransferChild(false);
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
-        // console.log(addr_from);
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        // let result = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, parentTokenID, web3.utils.encodePacked(parentTokenID)).send({ 
-        //     from: accounts[0] });
+        let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
+        console.log(result);
 
-        // console.log(result);
         
+        // update parent1 token metadata
+            // remove child1 from parent1 in dict
+            
+        var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
+        var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
+        var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
+       
 
-        let n = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
-        console.log(n);
-
-        // let o = erc998Minter.methods.getOwner(1).call();
-        // console.log("owner is :", o);
-
-        // let m = erc998Minter.methods.getMsgSender().call();
-        // console.log("msg sender is: ", m);
-
-        // console.log(accounts[0]);
-
-        //let cb = erc998Minter.methods._balances(1, addr_from, 2).call();
-        // console.log(cb);
-
-        // generate ipfs link of child w parent addr + token
-            // update_ipfs(accounts[0], tokenID, metadata.url);
-        // generate new ipfs link of parent w child addr + token, 
-            // uploadnft()....
-            // update_ipfs(parent_acc_addr, tokenID, metadata.url);
-            // update_children_mapping(parent_acc_addr, parent_tokenID, child_addr, child_tokenID));
+        await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, 0);
+        await update_parent(parentAcc2, parentTokenID2, childAcc, childTokenID, 1);
+    
+        update_transferred_child(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID);
 
     }
 
