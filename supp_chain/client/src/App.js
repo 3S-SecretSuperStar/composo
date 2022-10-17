@@ -343,19 +343,35 @@ function App() {
         // let o = await erc998Minter.methods.childBalance(parentTokenID, ERC1155PresetMinterPauser.networks[networkId].address, childTokenID).call();
         // console.log("child balance is:", o);
 
+        // let p = await erc998Minter.methods.childIdsOwned(parentTokenID, ERC1155PresetMinterPauser.networks[networkId].address).call();
+        // console.log("list of owned child IDs on a given child contract by parent token ID:", p);
+
+        // let q = await erc998Minter.methods.childContractsFor(parentTokenID).call();
+        // console.log("list of child contract where parent token ID has childs: ", q);
+
+        // let r = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
+        // console.log("contract addr of child token ID ", r);
+
         var metadata = await uploadNFT();    
-        var parentAcc = await erc998Minter.methods.getOwner(parentTokenID).call();
-        var childAcc = await erc998Minter.methods.getOwner(parentTokenID).call();
+        var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
+        console.log("parent token owner is: ", parentAcc);
+
+        // *** does this currently get incorrect parent? gets 1155 minter address, which is where child token is transferred from to 998. 
+        // *** child token contract address is not the metamask account but is currently the 1155 preset_minter_pauser address
+        // *** !! if the above is true then 998 is saving the correct contract address for the child token !!
+        var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
+
+        console.log("child token owner is: ", childAcc);
 
         // generate ipfs link of child w parent addr + token
-        update_ipfs(addr_to, childTokenID, metadata.url);
-        update_parent_mapping(addr_to, childTokenID, parentAcc, parentTokenID);
+        update_ipfs(childAcc, childTokenID, metadata.url);
+        update_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
         
        
         var res = await update_parent(parentAcc, parentTokenID, childAcc, childTokenID);
 
         if (res) {
-            console.log("IPFS of parent and mapping of child to parent updated.!");
+            console.log("IPFS of parent and mapping of child to parent updated!");
         }
         
     }

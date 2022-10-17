@@ -53,9 +53,9 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     }
 
     /**
-     * @dev Gives list of owned child ID on a child contract by token ID.
+     * @dev Gives list of owned child ID on a child contract by parent token ID and child contract.
      */
-    function childIdsForOn(uint256 tokenId, address childContract) override external view returns (uint256[] memory) {
+    function childIdsOwned(uint256 tokenId, address childContract) override external view returns (uint256[] memory) {
         uint256[] memory childTokenIds = new uint256[](_childsForChildContract[tokenId][childContract].length());
 
         for(uint256 i = 0; i < _childsForChildContract[tokenId][childContract].length(); i++) {
@@ -87,10 +87,30 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
     }
 
+    /**
+     * @dev Returns the owner of the token specified by tokenId. Wrapper function for ERC721 function ownerOf(). 
+    */
     function getOwner(uint256 tokenID) external view returns(address){
         return ownerOf(tokenID);
     }
 
+    /**
+     * @dev Returns the contract address of the child token ID, given a parent and child token ID.
+     */
+    function getChildContract(uint256 tokenID, uint256 childTokenID) external view returns(address){
+
+        for(uint256 i = 0; i < _childContract[tokenID].length(); i++) {
+            if (_childsForChildContract[tokenID][_childContract[tokenID].at(i)].contains(childTokenID)){
+                return _childContract[tokenID].at(i);
+            }
+        }
+
+        return address(0);
+    }
+
+    /**
+     * @dev Wrapper function to get message sender.
+     */
     function getMsgSender() external view returns(address){
         return _msgSender();
     }
