@@ -60,7 +60,7 @@ var composable = {};
 
 var parent_update = 0;
 var child_update = 0;
-var token_transfer = 0;
+var parent2_update = 0;
 
 function parent_to_update() {
     parent_update = 1;
@@ -70,8 +70,20 @@ function child_to_update() {
     child_update = 1;
 }
 
-function token_to_transfer() {
-    token_transfer = 1;
+function parent2_to_update() {
+    parent2_update = 1;
+}
+
+function null_parent() {
+    parent_update = 0;
+}
+
+function null_child() {
+    child_update = 0;
+}
+
+function null_parent2() {
+    parent2_update = 0;
 }
 
 var parentContractAddr = 0
@@ -167,7 +179,6 @@ async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, childToken
 async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID) {
 
     console.log("updating child's ipfs data...");
-    console.log("Composable: ", get_composable_structure());
     var url = get_ipfs_link(childAcc, childTokenID);
 
     var metadata = await $.getJSON(url)
@@ -176,7 +187,7 @@ async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, 
     try {
         metadata["properties"]["parent_tokens"].splice({"contract_address": parentAcc, "token_id": parentTokenID}, 1);
     } catch (error) {
-        console.log("Error in trying to remove parentTokenID1 from child token ipfs metadata.");
+        console.error("Error in trying to remove parentTokenID1 from child token ipfs metadata.");
     }
 
     // update metadata to include parent token 2
@@ -209,7 +220,7 @@ function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID)
         composable[owner_addr][tokenID]["parents"].splice([parent_addr, parent_tokenID], 1);
     }
     catch {
-        console.log("error removing parent mapping.");
+        console.error("error removing parent mapping.");
     }
 }
 
@@ -231,7 +242,7 @@ function remove_children_mapping(owner_addr, tokenID, child_addr, child_tokenID)
         console.log("removed token's children.");
     }
     catch {
-        console.log("error removing child mapping.");
+        console.error("error removing child mapping.");
     }
 }
 
@@ -247,11 +258,6 @@ async function update_parent(parentAcc, parentTokenID, childAcc, childTokenID, c
     parent_to_update();
 
     if (childTokens) {
-        console.log("parentacc: ", parentAcc);
-        console.log("parenttokenid: ", parentTokenID);
-        console.log("childacc: ", childAcc);
-        console.log("childtokenid: ", childTokenID);
-        console.log("childtokens: ", childTokens);
         await add_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
         add_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
     }
@@ -300,7 +306,7 @@ async function updateNFT(metadata) {
             return updated_metadata;
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
 }
 
@@ -338,6 +344,9 @@ function App() {
         setChildContractAddr(0);
         setNumChildTokens(0);
         setNumTokens(0);
+        null_parent();
+        null_child();
+        null_parent2();
     }
 
     async function uploadNFT() {
@@ -357,6 +366,13 @@ function App() {
                 c_token_id = childTokenID;
                 c_contract_addr = childContractAddr;
                 parent_update = 0;
+            }
+
+            if (parent2_update) {
+                token_id = parentTokenID2;
+                c_token_id = childTokenID;
+                c_contract_addr = childContractAddr;
+                parent2_update = 0;
             }
 
             if (child_update) {
@@ -400,7 +416,7 @@ function App() {
               
     
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -457,12 +473,13 @@ function App() {
         console.log("Minting 998-parent token...");
         setMintParentOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
-            from: accounts[0] });
-        
+            from: accounts[0] });  
         console.log(result);
-    
+            
         var metadata = await uploadNFT();
         update_ipfs(accounts[0], tokenID, metadata.url);
+
+        console.log("composable after minting: ", get_composable_structure());
     }
 
     const mintChildToken = async () => {
@@ -507,7 +524,7 @@ function App() {
         }
 
         else {
-            console.log("Error updating mapping.");
+            console.error("Error updating mapping.");
         }
         
     }
@@ -525,8 +542,11 @@ function App() {
         var childAcc = await erc998Minter.methods.getChildContract(parentTokenID2, childTokenID).call();
         console.log("childAcc in transfer: ", childAcc);
        
-
         var res1 = await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, 0);
+
+        parent2_to_update();
+        // *** should get from user input for batch transfer ***
+        setNumTokens(1);
         var res2 = await update_parent(parentAcc2, parentTokenID2, childAcc, childTokenID, 1);
 
         if (res1 && res2) {
@@ -540,7 +560,7 @@ function App() {
         }
 
         else {
-            console.log("Error updating mapping.");
+            console.error("Error updating mapping.");
         }
     }
 
