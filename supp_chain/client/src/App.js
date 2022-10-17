@@ -413,6 +413,7 @@ function App() {
         numTokens = numChildTokens;
         setNumTokens(0);
         child_to_update();
+        console.log("Generating and uploading child token metadata...");
         var metadata = await uploadNFT();
         setNumTokens(numChildTokens);
 
@@ -559,7 +560,6 @@ function App() {
 
    
     return (
-        
         <div>
             <Button variant="outlined" onClick={handleClickOpen} value="parent">Mint Parent</Button>
             <Dialog open={mintParentOpen} onClose={handleClose}>
@@ -694,9 +694,7 @@ function App() {
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
-        </div>
-        
-        
+        </div>    
     ); 
 
 };
