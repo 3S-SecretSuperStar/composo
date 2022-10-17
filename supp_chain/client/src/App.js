@@ -36,7 +36,7 @@ import $ from 'jquery';
 //     }
 // };
 
-// *** how to show minted tokens on Metamask account?
+// *** how to show minted tokens on Metamask account? ***
 
 // owner can be either an eth address or a contract address:
 // 1. the owner of the token - an ethereum account address
@@ -45,16 +45,55 @@ import $ from 'jquery';
 
 // token onwership states:
 // 1. minted, and no child and parent is an eth account 
-        // root token: 
+    // root token: 
         // generate + save token ipfs in dict
 // 2. minted, and transferred as a child to another token 
-        // child token: 
+    // child token: 
         // generate + save child ipfs with corr. parent addr and token
         // generate new parent ipfs with corr. child addr and token
         // update parent ipfs in dict
 
 
+
+
 var composable = {};
+
+var parent_update = 0;
+var child_update = 0;
+var token_transfer = 0;
+
+function parent_to_update() {
+    parent_update = 1;
+}
+
+function child_to_update() {
+    child_update = 1;
+}
+
+function token_to_transfer() {
+    token_transfer = 1;
+}
+
+var parentContractAddr = 0
+var parentContractAddr2 = 0
+var childContractAddr = 0
+var numTokens = 0
+
+function setParentContractAddr(addr) {
+    parentContractAddr = addr;
+}
+
+function setParentContractAddr2(addr) {
+    parentContractAddr2 = addr; 
+}
+
+function setChildContractAddr(addr) {
+    childContractAddr = addr;
+}
+
+function setNumTokens(num) {
+    numTokens = num;
+}
 
 // update ipfs link of token
 function update_ipfs(owner_addr, tokenID, ipfs_link) {
@@ -66,7 +105,7 @@ function update_ipfs(owner_addr, tokenID, ipfs_link) {
     if (!composable[owner_addr][tokenID]["metadata"]) composable[owner_addr][tokenID]["metadata"] = {};
     composable[owner_addr][tokenID]["metadata"] = ipfs_link;
 
-    console.log("updated ipfs, updated structure: ", composable);
+    console.log("updated token's ipfs.");
 
 }
 
@@ -77,7 +116,7 @@ function update_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID)
     if (!composable[owner_addr][tokenID]["parents"]) composable[owner_addr][tokenID]["parents"] = [];
     composable[owner_addr][tokenID]["parents"].push([parent_addr, parent_tokenID]);
 
-    console.log("updated token's parents, updated structure: ", composable);
+    console.log("updated token's parents.");
 
 }
 
@@ -88,7 +127,7 @@ function update_children_mapping(owner_addr, tokenID, child_addr, child_tokenID,
     if (!composable[owner_addr][tokenID]["children"]) composable[owner_addr][tokenID]["children"] = [];
     composable[owner_addr][tokenID]["children"].push([child_addr, child_tokenID, child_tokens]);
 
-    console.log("updated token's children, updated structure: ", composable);
+    console.log("updated token's children.");
 
 }
 
@@ -104,11 +143,10 @@ async function update_parent_ipfs(parentAcc, parentTokenID, childAcc, childToken
 
         // update metadata to include child token
         metadata["properties"]["child_tokens"].push({"contract_address": childAcc, "token_id": childTokenID, "num_tokens": childTokens});
-        console.log("updated metadata: ", metadata);
 
         console.log ("generating updated parent's ipfs...");
         var updated = await updateNFT(metadata);
-        console.log ("updated parent ipfs: ", updated.url);
+        console.log ("updated parent ipfs.");
 
         update_ipfs(parentAcc, parentTokenID, updated.url);
 }
@@ -124,17 +162,17 @@ async function update_child_ipfs(parentAcc, parentTokenID, childAcc, childTokenI
 
     // update metadata to include parent token
     metadata["properties"]["parent_tokens"].push({"contract_address": parentAcc, "token_id": parentTokenID});
-    console.log("updated metadata: ", metadata);
 
     console.log ("generating updated child's ipfs...");
     var updated = await updateNFT(metadata);
-    console.log ("updated child ipfs: ", updated.url);
+    console.log ("updated child ipfs.");
 
     update_ipfs(childAcc, childTokenID, updated.url);
 }
 
 // update parent ipfs and dictionary mapping
 async function update_parent(parentAcc, parentTokenID, childAcc, childTokenID, childTokens) {
+        parent_to_update();
         await update_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
         update_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
 
@@ -155,6 +193,10 @@ function get_ipfs_link(parentAcc, parentTokenID) {
     return composable[parentAcc][parentTokenID]["metadata"];
 }
 
+function get_composable_structure() {
+    return composable;
+}
+
 
 async function updateNFT(metadata) {
     const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
@@ -166,8 +208,8 @@ async function updateNFT(metadata) {
                 token_id: metadata["token_id"],
                 owner_address: metadata["owner_address"],
                 name: metadata["name"], 
-                image: blob, 
                 description: "description about the NFT.",
+                image: blob,
                 properties: {
                     num_child_tokens: metadata["properties"]["num_child_tokens"],
                     ownership_stage: "composable asset supply chain stage",
@@ -187,20 +229,14 @@ async function updateNFT(metadata) {
             return updated_metadata;
 
         } catch (error) {
-            // setErrorMessage("Could not save NFT to NFT.Storage - Aborted minting.");
             console.log(error);
         }
 }
-
-
-
+    
 function App() {
-
     const [tokenID, setTokenID] = useState(0);
     const [parentTokenID, setParentTokenID] = useState(0);
     const [parentTokenID2, setParentTokenID2] = useState(0);
-    const [parentContractAddr, setParentContractAddr] = useState("");
-    const [childContractAddr, setChildContractAddr] = useState("");
     const [childTokenID, setChildTokenID] = useState(0);
     const [numChildTokens, setNumChildTokens] = useState(0);
     const [loaded, setLoaded] = useState(false);
@@ -216,53 +252,52 @@ function App() {
     const [transferChild, setTransferChild] = useState(false);
     const [tokenName, setTokenName] = useState("");
 
+    // *** does this even work? ***
     function setNullState() {
         setTokenID(0);
         setChildTokenID(0);
         setParentTokenID(0);
-        setParentContractAddr(0);
+        setParentContractAddr(0)
+        setParentContractAddr2(0);
         setChildContractAddr(0);
         setNumChildTokens(0);
+        setNumTokens(0);
     }
 
     async function uploadNFT() {
         const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
         var blob = new Blob();
-        var token_id = 0;
+        var token_id = tokenID;
         var p_token_id = 0;
         var p_contract_addr = 0;
         var c_token_id = 0;
         var c_contract_addr = 0;
+        var owner_address = accounts[0];
+
         try {
 
-            if (childTokenID !== 0 && tokenID == 0) {
-                token_id = childTokenID;
-            }
-
-            if (childTokenID == 0 && tokenID !== 0) {
-                token_id = tokenID;
-            }
-
-            if (parentTokenID !== 0) {
-                p_token_id = parentTokenID;
-            }
-
-            if (parentContractAddr !== 0) {
-                p_contract_addr = parentContractAddr;
-            }
-
-            if (childContractAddr !== 0) {
+            if (parent_update) {
+                token_id = parentTokenID;
+                c_token_id = childTokenID;
                 c_contract_addr = childContractAddr;
+                parent_update = 0;
             }
 
-            
+            if (child_update) {
+                token_id = childTokenID;
+                p_token_id = parentTokenID;
+                p_contract_addr = parentContractAddr;
+                owner_address = childContractAddr;
+                child_update = 0;
+            }
+
             // Upload NFT to IPFS & Filecoin
             const metadata = await nftStorage.store({
                 token_id: token_id,
-                owner_address: accounts[0],
+                owner_address: owner_address,
                 name: tokenName, 
-                image: blob, 
                 description: "description about the NFT.",
+                image: blob,
                 properties: {
                     ownership_stage: "composable asset supply chain stage",
                     contract_address: "owner contract address", 
@@ -279,20 +314,16 @@ function App() {
                       {
                         contract_address: c_contract_addr,
                         token_id: c_token_id,
-                        num_tokens: numChildTokens,
+                        num_tokens: numTokens,
                       }
                     ]
                 }
             });
 
-            setNullState();
-
-
             return metadata;
               
     
         } catch (error) {
-            // setErrorMessage("Could not save NFT to NFT.Storage - Aborted minting.");
             console.log(error);
         }
     }
@@ -353,16 +384,9 @@ function App() {
             from: accounts[0] });
         
         console.log(result);
-        
+    
         var metadata = await uploadNFT();
-     
-
-        //let o = await erc998Minter.methods.getOwner(tokenID).call();
-        // console.log("owner of token is :", o);s
-        // console.log("IPFS link: ", metadata.url);
         update_ipfs(accounts[0], tokenID, metadata.url);
-
-        // setMintParentOpen(false);
     }
 
     const mintChildToken = async () => {
@@ -378,66 +402,41 @@ function App() {
         let transfer = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, numChildTokens, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         
         console.log(transfer);
-
-        
-        // let o = await erc998Minter.methods.childBalance(parentTokenID, ERC1155PresetMinterPauser.networks[networkId].address, childTokenID).call();
-        // console.log("child balance is:", o);
-
-        // let p = await erc998Minter.methods.childIdsOwned(parentTokenID, ERC1155PresetMinterPauser.networks[networkId].address).call();
-        // console.log("list of owned child IDs on a given child contract by parent token ID:", p);
-
-        // let q = await erc998Minter.methods.childContractsFor(parentTokenID).call();
-        // console.log("list of child contract where parent token ID has childs: ", q);
-
-        // let r = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
-        // console.log("contract addr of child token ID ", r);
-
-          
+      
         var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
-        console.log("parent token owner is: ", parentAcc);
-
-        // *** does this currently get incorrect parent? gets 1155 minter address, which is where child token is transferred from to 998. 
-        // *** child token contract address is not the metamask account but is currently the 1155 preset_minter_pauser address
-        // *** !! if the above is true then 998 is saving the correct contract address for the child token !!
         var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
-        console.log("child token owner is: ", childAcc);
 
-        // *** set parent/child/token values to null instead of values passed in
-
-        // code to set parentConractAddr to parentAcc:
-
-
-        console.log("parent contract address: ", parentAcc);
         setParentContractAddr(parentAcc);
-        console.log("PARENT ADDR: ", parentContractAddr);
-        console.log("child contract address: ", childAcc);
         setChildContractAddr(childAcc);
-        console.log("CHILD ADDR: ", childContractAddr);
 
         // to use child tokens in parents, not in child minter contract
-        var childTokens = numChildTokens;
-        setNumChildTokens(0);
+        numTokens = numChildTokens;
+        setNumTokens(0);
+        child_to_update();
         var metadata = await uploadNFT();
-        setNumChildTokens(childTokens);
-        console.log("CHILD TOKENS: ", childContractAddr);
-
-
+        setNumTokens(numChildTokens);
 
         // save ipfs link of child w parent addr + token mapping
         update_ipfs(childAcc, childTokenID, metadata.url);
         update_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
-        
-       
-        var res = await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, childTokens);
+    
+        // update parent token metadata
+        var res = await update_parent(parentAcc, parentTokenID, childAcc, childTokenID, numTokens);
 
         if (res) {
+            setNullState();
             console.log("IPFS of parent and mapping of child to parent updated!");
+            console.log("Composable structure: ", get_composable_structure());
+        }
+
+        else {
+            console.log("Error updating parent and child mapping.");
         }
         
     }
 
     const transferChildToParent = async () => {
-        console.log("Transferring 1155-child token to 988 ...");
+        console.log("Transferring 1155-child token to 988...");
         setTransferChild(false);
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         // console.log(addr_from);
@@ -471,9 +470,6 @@ function App() {
 
     }
 
-    // *** which 998 is the parent to set as the parent of the child
-    // rn child 998 is transferrred to 988 minter smart contract
-
     const mintChild998 = async () => {
         console.log("Minting 998-child token...");
         setMintChild998Open(false);
@@ -484,18 +480,8 @@ function App() {
         let t = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         console.log(t);
 
-        // let x = web3.utils.encodePacked(parentTokenID);
-        // console.log(x.length);
-
         let o = await erc998Minter.methods.childBalance(parentTokenID, ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address, childTokenID).call();
         console.log("child balance is:", o);
-
-        // generate ipfs link of child w parent addr + token
-            // update_ipfs(accounts[0], tokenID, metadata.url);
-        // generate new ipfs link of parent w child addr + token, 
-            // uploadnft()....
-            // update_ipfs(parent_acc_addr, tokenID, metadata.url);
-            // update_children_mapping(parent_acc_addr, parent_tokenID, child_addr, child_tokenID));
     }
 
     const handleInputChange = (event) => {
@@ -503,9 +489,6 @@ function App() {
         const value = target.value; 
         const name = target.name;
         
-        // this.setState({
-        //     [name]: value
-        // });
         if(name === "tokenID"){
             setTokenID(value);
         }
@@ -529,7 +512,6 @@ function App() {
         if(name === "childTokenID"){
             setChildTokenID(value);
         }
-
     }
 
     const handleClickOpen = (event) => {
@@ -718,6 +700,5 @@ function App() {
     ); 
 
 };
-
 
 export default App;
