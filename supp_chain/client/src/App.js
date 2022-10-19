@@ -8,6 +8,7 @@ import ReactFlow, {
   applyNodeChanges,
   ReactFlowProvider,
 } from 'react-flow-renderer';
+import 'reactflow/dist/style.css';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -251,8 +252,8 @@ function remove_children_mapping(owner_addr, tokenID, child_addr, child_tokenID)
 
 
 // update parent ipfs and dictionary mapping 
-// 0 child tokens -- remove mapping
 // 1+ child tokens -- add/update mapping
+// 0 child tokens -- remove mapping
 async function update_parent(parentAcc, parentTokenID, childAcc, childTokenID, childTokens) {
         
     parent_to_update();
@@ -502,7 +503,7 @@ function App() {
         setParentContractAddr(parentAcc);
         setChildContractAddr(childAcc);
 
-        // to use child tokens in parents, not in child minter contract
+        // to save num of child tokens in parents' metadata instead of in child token metadata
         numTokens = numChildTokens;
         setNumTokens(0);
         child_to_update();
@@ -576,6 +577,8 @@ function App() {
 
         let o = await erc998Minter.methods.childBalance(parentTokenID, ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address, childTokenID).call();
         console.log("child balance is:", o);
+
+        
     }
 
     const handleInputChange = (event) => {
@@ -650,8 +653,6 @@ function App() {
             setMintChild998Open(false);
         }
     };
-
-   
     return (
         <div>
             <Button variant="outlined" onClick={handleClickOpen} value="parent">Mint Parent</Button>
@@ -787,9 +788,12 @@ function App() {
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
-        </div>    
+        </div>  
     ); 
 
 };
 
 export default App;
+
+
+
