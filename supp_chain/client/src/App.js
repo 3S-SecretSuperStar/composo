@@ -14,7 +14,6 @@ import "./App.css";
 import { NFTStorage } from "nft.storage";
 import * as Composable from './Composable.js'
 
-
 function App() {
     const [tokenID, setTokenID] = useState(0);
     const [parentTokenID, setParentTokenID] = useState(0);
@@ -180,6 +179,7 @@ function App() {
         Composable.update_ipfs(accounts[0], tokenID, metadata.url);
 
         console.log("composable after minting: ", Composable.get_composable_structure());
+        Composable.updateFlow();
     }
 
     const mintChildToken = async () => {
@@ -220,6 +220,7 @@ function App() {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
+            Composable.updateFlow();
         }
 
         else {
@@ -256,6 +257,7 @@ function App() {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
+            Composable.updateFlow();
         }
 
         else {
@@ -351,7 +353,6 @@ function App() {
             setMintChild998Open(false);
         }
     };
-
 
     return (
         <div>
@@ -488,7 +489,7 @@ function App() {
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
-        </div>  
+            </div>  
     ); 
 
 };

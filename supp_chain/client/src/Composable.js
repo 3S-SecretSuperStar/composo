@@ -288,4 +288,69 @@ export async function updateNFT(metadata) {
 
 
 
+// --------------------------- REACT FLOW FUNCTIONS ---------------------------------------------
+
+export var nodes = [];
+export var edges = [];
+
+export function getNodes() {
+    console.log("getting nodes...");
+    nodes = [];
+    var node = {};
+    var composable = get_composable_structure();
+   
+    // get tokenID and contract address of each token, and add tokenID as id and label
+    // i and j increments for position shift
+    var i = 0;
+    for (var contract_address in composable) {
+        var j = 0;
+        for (var tokenID in composable[contract_address]) {
+            node = {};
+            node.id = tokenID;
+            node.position = {};
+            node.position = { x: 100+(i*50), y: 100+(i*50)+(j*50) };
+            node.data = {"label": tokenID};
+            nodes.push(node);
+            j++;
+        }
+        i++;
+    }
+
+    return nodes;
+
+}
+
+// get children of each tokenID from composable and add to edges
+export function getEdges() {
+    console.log("getting edges...");
+    edges = [];
+    var edge = {};
+    var composable = get_composable_structure();
+    for (var contract_address in composable) {
+        for (var token in composable[contract_address]) {
+            for (var child_array in composable[contract_address][token]["children"]) {
+                edge = {};
+                edge.id = token + "-" + composable[contract_address][token]["children"][child_array][1];
+                //console.log("Edge ID added: ", edge.id);
+                edge.source = token;
+                edge.target = composable[contract_address][token]["children"][child_array][1];
+                edge.label = "owns";
+                edge.type = "default";
+                edge.animated = true;
+                edges.push(edge);
+            }
+        }
+    }
+    return edges;
+}
+
+
+export function updateFlow() {
+    getNodes();
+    getEdges();
+    console.log("Generated flow data.");
+    return [nodes, edges];
+}
+
+
 // -------------------------------------------------------------------------------
