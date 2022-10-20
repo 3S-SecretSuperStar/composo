@@ -170,10 +170,6 @@ function App() {
 
         var url = await Composable.cache_cid(metadata.url.replace("ipfs://", ""));
         console.log("USED URL:", url);
-        await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
-
-        
-        // await Composable.cache_cid(metadata.url.replace("ipfs://", ""))
 
         Composable.update_ipfs(accounts[0], tokenID, url);
 
@@ -207,11 +203,10 @@ function App() {
         console.log("Generating and uploading child token metadata...");
         var metadata = await uploadNFT();
         var url = await Composable.cache_cid(metadata.url.replace("ipfs://", ""));
-        await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
         Composable.setNumTokens(numChildTokens);
 
         // save ipfs link of child w parent addr + token mapping
-        //Composable.update_ipfs(childAcc, childTokenID, url);
+        Composable.update_ipfs(childAcc, childTokenID, url);
         Composable.add_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
     
         // update parent token metadata
@@ -264,6 +259,7 @@ function App() {
         else {
             console.error("Error updating mapping.");
         }
+
     }
 
     const mintChild998 = async () => {

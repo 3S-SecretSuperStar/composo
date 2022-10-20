@@ -150,7 +150,6 @@ export async function add_parent_ipfs(parentAcc, parentTokenID, childAcc, childT
 
     console.log ("generating updated parent token's ipfs...");
     var updated = await updateNFT(metadata);
-    await validateNFTupload(get_ipfs_link(parentAcc, parentTokenID));
     console.log ("updated parent ipfs.");
 
     update_ipfs(parentAcc, parentTokenID, updated.url);
@@ -171,7 +170,6 @@ export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, chi
 
     console.log ("generating updated parent token's ipfs...");
     var updated = await updateNFT(metadata);
-    await validateNFTupload(get_ipfs_link(parentAcc, parentTokenID));
     console.log ("updated parent ipfs.");
 
     update_ipfs(parentAcc, parentTokenID, updated.url);
@@ -196,7 +194,6 @@ export async function update_child_ipfs_transfer(parentAcc, parentTokenID, paren
 
     console.log ("generating updated child token's ipfs...");
     var updated = await updateNFT(metadata);
-    await validateNFTupload(get_ipfs_link(parentAcc, parentTokenID));
     console.log ("updated child ipfs.");
 
     update_ipfs(childAcc, childTokenID, updated.url);
@@ -313,21 +310,7 @@ export async function updateNFT(metadata) {
 }
 
 
-// ---------------------- VALIDATION AND CACHING OPTIMIZATION export functions ----------------------
-
-
-export async function validateNFTupload(metadata) {
-
-    var cid = metadata.replace("ipfs://", "")
-    cid = cid.replace("/metadata.json", "")
-    console.log("CID: ", cid);
-    const check = await nftStorage.check(cid);
-    console.log("Upload check: ", check);
-    if (check) {
-        const status = await nftStorage.status(cid);
-        console.log("NFT status check: ", status);
-    }
-}
+// ---------------------- CACHING OPTIMIZATION export functions ----------------------
 
 // upload to ipfs button in: https://natoboram.gitlab.io/public-gateway-cacher/
 
