@@ -162,10 +162,8 @@ export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, chi
 export async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID) {
 
     console.log("updating child's ipfs data...");
-    var url = get_ipfs_link(childAcc, childTokenID);
-
-    var metadata = await $.getJSON(url)
-
+    var metadata = await get_token_metadata(childAcc, childTokenID);
+    
     // update metadata to remove parent token 1
     try {
         metadata["properties"]["parent_tokens"].splice({"contract_address": parentAcc, "token_id": parentTokenID}, 1);
@@ -341,6 +339,7 @@ export function getEdges() {
                 edge.target = composable[contract_address][token]["children"][child_data][1];
                 edge.label = "owns";
                 edge.type = "default";
+                edge.labelShowBG = false;
                 edge.animated = true;
                 edges.push(edge);
             }

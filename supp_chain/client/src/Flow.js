@@ -6,7 +6,7 @@ import { nodes, edges } from './Composable.js'
   const edgeOptions = {
       animated: true,
       style: {
-        stroke: 'black',
+        stroke: 'white',
       },
     };
 
@@ -14,7 +14,7 @@ import { nodes, edges } from './Composable.js'
     height: 120,
   };
 
-  const connectionLineStyle = { stroke: 'black' };
+  const connectionLineStyle = { stroke: 'white' };
 
   const Flow = () => {
 
@@ -37,6 +37,7 @@ import { nodes, edges } from './Composable.js'
         fitView
         style={{
           backgroundColor: '#0F2027',
+          backdropFilter: 'blur(20px)',
         }}
         connectionLineStyle={connectionLineStyle}
       >
