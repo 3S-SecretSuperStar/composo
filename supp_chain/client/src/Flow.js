@@ -25,7 +25,7 @@ import { nodes, edges } from './Composable.js'
         ReactFlowInstance.setNodes(nodes);
         ReactFlowInstance.setEdges(edges);
         //console.log("Flow structure: ", updateFlow())
-      }, 5000);
+      }, 2000);
       return () => clearInterval(interval);
     }, [ReactFlowInstance]);
   

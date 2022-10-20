@@ -159,18 +159,22 @@ function App() {
 
     const mintToken = async () => {
         console.log("Minting 998-parent token...");
+
+        
         setMintParentOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
             from: accounts[0] });  
         console.log(result);
             
         var metadata = await uploadNFT();
-        await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
+        var url = await Composable.cache_cid(metadata.url.replace("ipfs://", ""));
+        console.log("USED URL:", url);
+        //await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
 
         
         // await Composable.cache_cid(metadata.url.replace("ipfs://", ""))
 
-        Composable.update_ipfs(accounts[0], tokenID, metadata.url);
+        Composable.update_ipfs(accounts[0], tokenID, url);
 
         console.log("composable after minting: ", Composable.get_composable_structure());
         Composable.updateFlow();
@@ -201,11 +205,12 @@ function App() {
         Composable.child_to_update();
         console.log("Generating and uploading child token metadata...");
         var metadata = await uploadNFT();
-        await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
+        var url = await Composable.cache_cid(metadata.url.replace("ipfs://", ""));
+        //await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
         Composable.setNumTokens(numChildTokens);
 
         // save ipfs link of child w parent addr + token mapping
-        Composable.update_ipfs(childAcc, childTokenID, metadata.url);
+        Composable.update_ipfs(childAcc, childTokenID, url);
         Composable.add_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
     
         // update parent token metadata

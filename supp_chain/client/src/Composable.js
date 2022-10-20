@@ -1,3 +1,4 @@
+import gateways from './cacher/gateways.json';
 import $ from 'jquery';
 import { NFTStorage } from "nft.storage";
 const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
@@ -122,8 +123,16 @@ export function update_ipfs(owner_addr, tokenID, ipfs_link) {
     if (!composable[owner_addr][tokenID]["metadata"]) composable[owner_addr][tokenID]["metadata"] = {};
     composable[owner_addr][tokenID]["metadata"] = nftstorage_ipfs_link;
 
-    console.log("updated token's ipfs.");
+    console.log("generated/updated token's ipfs.");
 
+}
+
+//given account token id and ipfs, update the ipfs link of the token
+export function update_ipfs_link(acc, tokenID, ipfsLink) {
+    if (!composable[acc]) composable[acc] = {};
+    if (!composable[acc][tokenID]) composable[acc][tokenID] = {};
+    if (!composable[acc][tokenID]["metadata"]) composable[acc][tokenID]["metadata"] = {};
+    composable[acc][tokenID]["metadata"] = ipfsLink;
 }
 
 
@@ -172,7 +181,6 @@ export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, chi
 // update child ipfs link to remove parent token 2
 // update child ipfs link to include parent token 2
 export async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID) {
-
     console.log("updating child token's ipfs data...");
     var metadata = await get_token_metadata(childAcc, childTokenID);
 
@@ -321,47 +329,48 @@ export async function validateNFTupload(metadata) {
     }
 }
 
-// cache a specific IPFS hash to a bunch of public gateways, for faster retrieval
-export async function cache_cid(cid) {
 // upload to ipfs button in: https://natoboram.gitlab.io/public-gateway-cacher/
 
-    const url = "https://natoboram.gitlab.io/public-gateway-cacher/";
-    console.log("Attempting to cache CID on some public gatways...");
+// cache a specific IPFS hash to a bunch of public gateways, for faster retrieval
+export async function cache_cid(cid) {
 
-    try {
-        // post CID to IPFS button in https://natoboram.gitlab.io/public-gateway-cacher/
-            
-        const response = await fetch(url, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { "Access-Control-Allow-Origin": '*' },
-            body: JSON.stringify({ value: cid }),
-        });
+    var ipfsLink = "";
+    function set_url(url) {
+        console.log("INSIDE: ", url)
+        ipfsLink = url;
+    }
 
-        console.log("cache response: ", response)
+    console.log("Attempting to cache CID on some public gatways...", cid);;
+    // loop through gateways
+    for (var i = 0; i < gateways.length ; i++) {
         
-        if (response.ok) {
-            console.log("Successfully cached CID on some public gatways.");
-        }
-
-        else {
-            console.error("Error trying to caching CID on some public gatways.");
-        }
-
-        // sleep for 5 seconds and then fetch the first 5 gateway urls from https://natoboram.gitlab.io/public-gateway-cacher/
-        await delay(5000);
-        console.log("Fetching gateway urls...");
-
-        // get request the url and log the first 5 gateways:
-        const response2 = await fetch(url);
-        console.log("gateway response: ", response2);
-        const gateways = await response2
-        console.log("gateways: ", gateways)
-  
+        console.log("Trying to cache link: ", gateways[i] + "ipfs/"+ cid);
+        fetch(
+            gateways[i] + "ipfs/"+ cid, {
+            method: "GET",
+            headers: {
+            "Content-Type": "text/plain",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.5"
+            },
+        }).then((response, flag) => {
+            if (response.status === 200) {
+                console.log("Successfully cached CID on gateway: ", response.url);
+                console.log('response.status: ', response.status); 
+                set_url(response.url);
+                return response.url;
+            }
+        }).then((url) => {
+            const error = new Error("BBB");
+            throw error;
+        }).then((url) => {
+            console.log("");
+        }).catch((error) => {
+            console.log("");
+        });
     }
-    catch (error) {
-        console.error('Error:', error);
-    }
+
+    return ipfsLink;
 
 }
 
