@@ -1,5 +1,5 @@
 import { useEffect, Component, useState, useCallback } from 'react';
-import ReactFlow, { Controls, Background, MiniMap, applyEdgeChanges, applyNodeChanges } from 'reactflow';
+import ReactFlow, { ReactFlowProvider, useReactFlow, ReactFlowProps, Controls, Background, MiniMap, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nodes as Nodes, edges as Edges, updateFlow } from './Composable.js'
 
@@ -17,14 +17,19 @@ import { nodes as Nodes, edges as Edges, updateFlow } from './Composable.js'
   const connectionLineStyle = { stroke: 'black' };
 
   const Flow = () => {
-    const [nodes, setNodes] = useState(Nodes);
-    const [edges, setEdges] = useState(Edges);
+    const [nodes, set_Nodes] = useState(Nodes);
+    const [edges, set_Edges] = useState(Edges);
+
+    const ReactFlowInstance = useReactFlow();
   
     useEffect(() => {
+      console.log(ReactFlowInstance);
       const interval = setInterval(() => {
         var res = updateFlow();
-        setNodes(res[0]);
-        setEdges(res[1]);
+        set_Nodes(res[0]);
+        ReactFlowInstance.setNodes(res[0]);
+        ReactFlowInstance.setEdges(res[1]);
+        set_Edges(res[1]);
       }, 5000);
       return () => clearInterval(interval);
     }, []);
@@ -48,4 +53,67 @@ import { nodes as Nodes, edges as Edges, updateFlow } from './Composable.js'
 
   };
 
-  export default Flow;
+  function FlowWithProvider(props) {
+    return (
+      <ReactFlowProvider>
+        <Flow {...props} />
+      </ReactFlowProvider>
+    );
+  }
+  
+  export default FlowWithProvider;
+
+
+
+/*
+  NodeChange:
+
+    type NodeRemoveChange = {
+    id: string;
+    type: 'remove';
+    };
+
+    type NodeAddChange<NodeData = any> = {
+      item: Node<NodeData>;
+      type: 'add';
+    };
+
+    type NodeResetChange<NodeData = any> = {
+      item: Node<NodeData>;
+      type: 'reset';
+    };
+
+
+  EdgeChange:
+
+    type EdgeSelectionChange = NodeSelectionChange;
+    type EdgeRemoveChange = NodeRemoveChange;
+    type EdgeAddChange<EdgeData = any> = {
+      item: Edge<EdgeData>;
+      type: 'add';
+    };
+    type EdgeResetChange<EdgeData = any> = {
+      item: Edge<EdgeData>;
+      type: 'reset';
+    };
+    type EdgeChange = EdgeSelectionChange | EdgeRemoveChange | EdgeAddChange | EdgeResetChange;
+
+
+  onNodesChange​:
+
+    Description:
+    Called on drag, select and remove - handler for adding interactivity for a controlled flow
+    Type:
+    (nodeChanges: NodeChange[]) => void
+    Default:
+    undefined
+    onEdgesChange​
+
+  onEdgesChange: 
+    Description:
+    Called on select and remove - handler for adding interactivity for a controlled flow
+    Type:
+    (edgeChanges: EdgeChange[]) => void
+    Default:
+    undefined
+*/
