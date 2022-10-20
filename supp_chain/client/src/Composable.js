@@ -2,7 +2,6 @@ import $ from 'jquery';
 import { NFTStorage } from "nft.storage";
 const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
 
-
 //composable dict structure
 // var composable = {
 //     [owner_addr]: {
@@ -31,7 +30,7 @@ const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
         // generate new parent ipfs with corr. child addr and token
         // update parent ipfs in dict
 
-
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export var composable = {};
 
@@ -142,7 +141,7 @@ export async function add_parent_ipfs(parentAcc, parentTokenID, childAcc, childT
 
     console.log ("generating updated parent token's ipfs...");
     var updated = await updateNFT(metadata);
-    await validateNFTupload(metadata);
+    await validateNFTupload(get_ipfs_link(parentAcc, parentTokenID));
     console.log ("updated parent ipfs.");
 
     update_ipfs(parentAcc, parentTokenID, updated.url);
@@ -163,7 +162,7 @@ export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, chi
 
     console.log ("generating updated parent token's ipfs...");
     var updated = await updateNFT(metadata);
-    await validateNFTupload(metadata);
+    await validateNFTupload(get_ipfs_link(parentAcc, parentTokenID));
     console.log ("updated parent ipfs.");
 
     update_ipfs(parentAcc, parentTokenID, updated.url);
@@ -189,7 +188,7 @@ export async function update_child_ipfs_transfer(parentAcc, parentTokenID, paren
 
     console.log ("generating updated child token's ipfs...");
     var updated = await updateNFT(metadata);
-    await validateNFTupload(metadata);
+    await validateNFTupload(get_ipfs_link(parentAcc, parentTokenID));
     console.log ("updated child ipfs.");
 
     update_ipfs(childAcc, childTokenID, updated.url);
@@ -242,7 +241,7 @@ export function remove_children_mapping(owner_addr, tokenID, child_addr, child_t
 }
 
 
-// ---------------------- UPDATION & VALIDATION export functions ----------------------
+// ---------------------- UPDATION export functions ----------------------
 
 
 // update parent ipfs and dictionary mapping 
@@ -306,8 +305,12 @@ export async function updateNFT(metadata) {
 }
 
 
+// ---------------------- VALIDATION AND CACHING OPTIMIZATION export functions ----------------------
+
+
 export async function validateNFTupload(metadata) {
-    var cid = metadata.url.replace("ipfs://", "")
+
+    var cid = metadata.replace("ipfs://", "")
     cid = cid.replace("/metadata.json", "")
     console.log("CID: ", cid);
     const check = await nftStorage.check(cid);
@@ -318,8 +321,52 @@ export async function validateNFTupload(metadata) {
     }
 }
 
+// cache a specific IPFS hash to a bunch of public gateways, for faster retrieval
+export async function cache_cid(cid) {
+// upload to ipfs button in: https://natoboram.gitlab.io/public-gateway-cacher/
 
-// --------------------------- REACT FLOW FUNCTIONS ---------------------------------------------
+    const url = "https://natoboram.gitlab.io/public-gateway-cacher/";
+    console.log("Attempting to cache CID on some public gatways...");
+
+    try {
+        // post CID to IPFS button in https://natoboram.gitlab.io/public-gateway-cacher/
+            
+        const response = await fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { "Access-Control-Allow-Origin": '*' },
+            body: JSON.stringify({ value: cid }),
+        });
+
+        console.log("cache response: ", response)
+        
+        if (response.ok) {
+            console.log("Successfully cached CID on some public gatways.");
+        }
+
+        else {
+            console.error("Error trying to caching CID on some public gatways.");
+        }
+
+        // sleep for 5 seconds and then fetch the first 5 gateway urls from https://natoboram.gitlab.io/public-gateway-cacher/
+        await delay(5000);
+        console.log("Fetching gateway urls...");
+
+        // get request the url and log the first 5 gateways:
+        const response2 = await fetch(url);
+        console.log("gateway response: ", response2);
+        const gateways = await response2
+        console.log("gateways: ", gateways)
+  
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+
+}
+
+
+// --------------------------- REACT FLOW RENDERING FUNCTIONS ---------------------------------------------
 
 export var nodes = [];
 export var edges = [];

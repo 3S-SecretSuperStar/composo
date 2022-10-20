@@ -165,7 +165,11 @@ function App() {
         console.log(result);
             
         var metadata = await uploadNFT();
-        await Composable.validateNFTupload(metadata);
+        await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
+
+        
+        // await Composable.cache_cid(metadata.url.replace("ipfs://", ""))
+
         Composable.update_ipfs(accounts[0], tokenID, metadata.url);
 
         console.log("composable after minting: ", Composable.get_composable_structure());
@@ -197,7 +201,7 @@ function App() {
         Composable.child_to_update();
         console.log("Generating and uploading child token metadata...");
         var metadata = await uploadNFT();
-        await Composable.validateNFTupload(metadata);
+        await Composable.validateNFTupload(metadata.url.replace("ipfs://", ""));
         Composable.setNumTokens(numChildTokens);
 
         // save ipfs link of child w parent addr + token mapping
