@@ -95,8 +95,17 @@ export function get_ipfs_link(acc, tokenID) {
 export async function get_token_metadata(acc, tokenID) {
     var url = get_ipfs_link(acc, tokenID);
 
-    // caching of data set to true by default
-    var metadata = await $.getJSON(url)
+    // caching of data set to true
+    try {
+        var metadata = await $.ajax({
+            url: url,
+            dataType: 'json',
+            timeout: 120000,  //120 second timeout
+            cache: true
+        });
+    } catch (error) {
+        console.log("Failed to fetch metdata from IPFS, Error ", error);
+    }
 
     return metadata;
 } 
@@ -312,7 +321,7 @@ export async function getNodes() {
             node = {};
             node.id = tokenID;
             node.position = {};
-            node.position = { x: 100+(i*50), y: 100+(i*50)+(j*50) };
+            node.position = { x: 100+(i*50), y: 100+(i*50)+(j*100) };
             node.data = {"label": tokenID};
             nodes.push(node);
             j++;
