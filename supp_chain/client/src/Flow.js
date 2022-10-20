@@ -36,13 +36,14 @@ import { nodes, edges } from './Composable.js'
         defaultEdgeOptions={edgeOptions}
         fitView
         style={{
-          backgroundColor: '#D3D2E5',
+          backgroundColor: '#0F2027',
         }}
         connectionLineStyle={connectionLineStyle}
       >
         <MiniMap style={minimapStyle} />
         <Controls />
-        <Background color="#aaa" gap={16} />
+        <Background color="#aaa"
+          gap={16} />
     </ReactFlow>
     );
 
