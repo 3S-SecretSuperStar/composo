@@ -1,6 +1,6 @@
 # Composo
 
-Thesis B code mateiral.
+Thesis B & C code mateiral.
 
 Setting up Supp_Chain:
 There's a specific way to launch everything in /supp_chain:
