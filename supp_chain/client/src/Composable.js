@@ -334,19 +334,22 @@ export async function validateNFTupload(metadata) {
 // cache a specific IPFS hash to a bunch of public gateways, for faster retrieval
 export async function cache_cid(cid) {
 
-    var ipfsLink = "";
-    function set_url(url) {
-        console.log("INSIDE: ", url)
-        ipfsLink = url;
-    }
+    // var ipfsLink = "";
+    // function set_url(url) {
+    //     console.log("INSIDE: ", url)
+    //     ipfsLink = url;
+    // }
+    let res = "";
+    let l = cid.replace("/metadata.json", "");
+    // console.
 
     console.log("Attempting to cache CID on some public gatways...", cid);;
     // loop through gateways
     for (var i = 0; i < gateways.length ; i++) {
         
         console.log("Trying to cache link: ", gateways[i] + "ipfs/"+ cid);
-        fetch(
-            gateways[i] + "ipfs/"+ cid, {
+        res = fetch(
+            "https://" + l + ".ipfs.nftstorage.link/metadata.json", {
             method: "GET",
             headers: {
             "Content-Type": "text/plain",
@@ -357,20 +360,24 @@ export async function cache_cid(cid) {
             if (response.status === 200) {
                 console.log("Successfully cached CID on gateway: ", response.url);
                 console.log('response.status: ', response.status); 
-                set_url(response.url);
+                // set_url(response.url);
                 return response.url;
             }
-        }).then((url) => {
-            const error = new Error("BBB");
-            throw error;
-        }).then((url) => {
-            console.log("");
-        }).catch((error) => {
-            console.log("");
         });
+        // .then((url) => {
+        //     const error = new Error("BBB");
+        //     throw error;
+        // }).then((url) => {
+        //     console.log("");
+        // }).catch((error) => {
+        //     console.log("");
+        // });
+        
     }
 
-    return ipfsLink;
+    // return ipfsLink;
+    // return r;
+    return res;
 
 }
 
