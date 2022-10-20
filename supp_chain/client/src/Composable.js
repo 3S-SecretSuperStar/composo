@@ -286,15 +286,12 @@ export async function updateNFT(metadata) {
 }
 
 
-
-
 // --------------------------- REACT FLOW FUNCTIONS ---------------------------------------------
 
 export var nodes = [];
 export var edges = [];
 
 export function getNodes() {
-    console.log("getting nodes...");
     nodes = [];
     var node = {};
     var composable = get_composable_structure();
@@ -322,7 +319,6 @@ export function getNodes() {
 
 // get children of each tokenID from composable and add to edges
 export function getEdges() {
-    console.log("getting edges...");
     edges = [];
     var edge = {};
     var composable = get_composable_structure();
@@ -348,9 +344,7 @@ export function getEdges() {
 export function updateFlow() {
     getNodes();
     getEdges();
-    console.log("Generated flow data.");
     return [nodes, edges];
 }
-
 
 // -------------------------------------------------------------------------------

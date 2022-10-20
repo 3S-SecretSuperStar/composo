@@ -1,7 +1,7 @@
-import { useEffect, Component, useState, useCallback } from 'react';
-import ReactFlow, { ReactFlowProvider, useReactFlow, ReactFlowProps, Controls, Background, MiniMap, applyEdgeChanges, applyNodeChanges } from 'reactflow';
+import { useEffect, useState} from 'react';
+import ReactFlow, { ReactFlowProvider, useReactFlow, Controls, Background, MiniMap } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { nodes as Nodes, edges as Edges, updateFlow } from './Composable.js'
+import { nodes, edges, updateFlow } from './Composable.js'
 
   const edgeOptions = {
       animated: true,
@@ -17,20 +17,15 @@ import { nodes as Nodes, edges as Edges, updateFlow } from './Composable.js'
   const connectionLineStyle = { stroke: 'black' };
 
   const Flow = () => {
-    const [nodes, set_Nodes] = useState(Nodes);
-    const [edges, set_Edges] = useState(Edges);
 
     const ReactFlowInstance = useReactFlow();
   
     useEffect(() => {
       console.log(ReactFlowInstance);
       const interval = setInterval(() => {
-        var res = updateFlow();
-        set_Nodes(res[0]);
-        ReactFlowInstance.setNodes(res[0]);
-        ReactFlowInstance.setEdges(res[1]);
-        set_Edges(res[1]);
-      }, 5000);
+        ReactFlowInstance.setNodes(nodes);
+        ReactFlowInstance.setEdges(edges);
+      }, 2000);
       return () => clearInterval(interval);
     }, []);
   
