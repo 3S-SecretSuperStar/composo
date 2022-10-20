@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import { NFTStorage } from "nft.storage";
+const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
+
 
 //composable dict structure
 // var composable = {
@@ -140,6 +142,7 @@ export async function add_parent_ipfs(parentAcc, parentTokenID, childAcc, childT
 
     console.log ("generating updated parent token's ipfs...");
     var updated = await updateNFT(metadata);
+    await validateNFTupload(metadata);
     console.log ("updated parent ipfs.");
 
     update_ipfs(parentAcc, parentTokenID, updated.url);
@@ -160,6 +163,7 @@ export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, chi
 
     console.log ("generating updated parent token's ipfs...");
     var updated = await updateNFT(metadata);
+    await validateNFTupload(metadata);
     console.log ("updated parent ipfs.");
 
     update_ipfs(parentAcc, parentTokenID, updated.url);
@@ -185,6 +189,7 @@ export async function update_child_ipfs_transfer(parentAcc, parentTokenID, paren
 
     console.log ("generating updated child token's ipfs...");
     var updated = await updateNFT(metadata);
+    await validateNFTupload(metadata);
     console.log ("updated child ipfs.");
 
     update_ipfs(childAcc, childTokenID, updated.url);
@@ -237,7 +242,7 @@ export function remove_children_mapping(owner_addr, tokenID, child_addr, child_t
 }
 
 
-// ---------------------- UPDATION export functions ----------------------
+// ---------------------- UPDATION & VALIDATION export functions ----------------------
 
 
 // update parent ipfs and dictionary mapping 
@@ -298,6 +303,19 @@ export async function updateNFT(metadata) {
         } catch (error) {
             console.error(error);
         }
+}
+
+
+export async function validateNFTupload(metadata) {
+    var cid = metadata.url.replace("ipfs://", "")
+    cid = cid.replace("/metadata.json", "")
+    console.log("CID: ", cid);
+    const check = await nftStorage.check(cid);
+    console.log("Upload check: ", check);
+    if (check) {
+        const status = await nftStorage.status(cid);
+        console.log("NFT status: ", status);
+    }
 }
 
 

@@ -117,18 +117,6 @@ function App() {
         }
     }
 
-    async function validateNFTupload(metadata) {
-        var cid = metadata.url.replace("ipfs://", "")
-        cid = cid.replace("/metadata.json", "")
-        console.log("CID: ", cid);
-        const check = await nftStorage.check(cid);
-        console.log("Upload check: ", check);
-        if (check) {
-            const status = await nftStorage.status(cid);
-            console.log("NFT status: ", status);
-        }
-    }
-
     // component mount
     useEffect(() => {
         
@@ -177,7 +165,7 @@ function App() {
         console.log(result);
             
         var metadata = await uploadNFT();
-        await validateNFTupload(metadata);
+        await Composable.validateNFTupload(metadata);
         Composable.update_ipfs(accounts[0], tokenID, metadata.url);
 
         console.log("composable after minting: ", Composable.get_composable_structure());
@@ -209,7 +197,7 @@ function App() {
         Composable.child_to_update();
         console.log("Generating and uploading child token metadata...");
         var metadata = await uploadNFT();
-        await validateNFTupload(metadata);
+        await Composable.validateNFTupload(metadata);
         Composable.setNumTokens(numChildTokens);
 
         // save ipfs link of child w parent addr + token mapping
