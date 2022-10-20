@@ -1,4 +1,4 @@
-import { useEffect} from 'react';
+import { useEffect } from 'react';
 import ReactFlow, { ReactFlowProvider, useReactFlow, Controls, Background, MiniMap } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nodes, edges } from './Composable.js'
@@ -18,16 +18,16 @@ import { nodes, edges } from './Composable.js'
 
   const Flow = () => {
 
-    const ReactFlowInstance = useReactFlow();
+  const ReactFlowInstance = useReactFlow();
   
     useEffect(() => {
-      console.log(ReactFlowInstance);
       const interval = setInterval(() => {
         ReactFlowInstance.setNodes(nodes);
         ReactFlowInstance.setEdges(edges);
-      }, 2000);
+        //console.log("Flow structure: ", updateFlow())
+      }, 5000);
       return () => clearInterval(interval);
-    }, []);
+    }, [ReactFlowInstance]);
   
     return (
       <ReactFlow

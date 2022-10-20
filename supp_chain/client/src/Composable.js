@@ -92,6 +92,15 @@ export function get_ipfs_link(acc, tokenID) {
     return composable[acc][tokenID]["metadata"];
 }
 
+export async function get_token_metadata(acc, tokenID) {
+    var url = get_ipfs_link(acc, tokenID);
+
+    // caching of data set to true by default
+    var metadata = await $.getJSON(url)
+
+    return metadata;
+} 
+
 
 // update ipfs link of token
 export function update_ipfs(owner_addr, tokenID, ipfs_link) {
@@ -113,9 +122,9 @@ export function update_ipfs(owner_addr, tokenID, ipfs_link) {
 export async function add_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID, childTokens) {
 
     console.log("updating parent's ipfs data...");
-    var url = get_ipfs_link(parentAcc, parentTokenID);
     
-    var metadata = await $.getJSON(url)
+    
+    var metadata = await get_token_metadata(parentAcc, parentTokenID);
 
     // update metadata to include child token
     metadata["properties"]["child_tokens"].push({"contract_address": childAcc, "token_id": childTokenID, "num_tokens": childTokens});
@@ -131,9 +140,8 @@ export async function add_parent_ipfs(parentAcc, parentTokenID, childAcc, childT
 export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, childTokenID) {
 
     console.log("updating parent's ipfs data...");
-    var url = get_ipfs_link(parentAcc, parentTokenID);
     
-    var metadata = await $.getJSON(url)
+    var metadata = await get_token_metadata(parentAcc, parentTokenID);
 
     // update metadata to remove child token
     var child_tokens = metadata["properties"]["child_tokens"];
@@ -291,7 +299,7 @@ export async function updateNFT(metadata) {
 export var nodes = [];
 export var edges = [];
 
-export function getNodes() {
+export async function getNodes() {
     nodes = [];
     var node = {};
     var composable = get_composable_structure();
@@ -299,9 +307,10 @@ export function getNodes() {
     // get tokenID and contract address of each token, and add tokenID as id and label
     // i and j increments for position shift
     var i = 0;
-    for (var contract_address in composable) {
+    for (var contractAddress in composable) {
         var j = 0;
-        for (var tokenID in composable[contract_address]) {
+        for (var tokenID in composable[contractAddress]) {
+            // var metadata = await get_token_metadata(contractAddress, tokenID);
             node = {};
             node.id = tokenID;
             node.position = {};
@@ -324,14 +333,12 @@ export function getEdges() {
     var composable = get_composable_structure();
     for (var contract_address in composable) {
         for (var token in composable[contract_address]) {
-            for (var child_array in composable[contract_address][token]["children"]) {
-                console.log("child array: ", child_array);
-                console.log("child array[1]: ", child_array[1]);
+            for (var child_data in composable[contract_address][token]["children"]) {
                 edge = {};
-                edge.id = token + "-" + composable[contract_address][token]["children"][child_array][1];
+                edge.id = token + "-" + composable[contract_address][token]["children"][child_data][1];
                 //console.log("Edge ID added: ", edge.id);
                 edge.source = token;
-                edge.target = composable[contract_address][token]["children"][child_array][1];
+                edge.target = composable[contract_address][token]["children"][child_data][1];
                 edge.label = "owns";
                 edge.type = "default";
                 edge.animated = true;
@@ -339,8 +346,6 @@ export function getEdges() {
             }
         }
     }
-
-    console.log(edges)
     return edges;
 }
 

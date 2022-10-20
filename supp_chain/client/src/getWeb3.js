@@ -9,8 +9,9 @@ const getWeb3 = () =>
         const web3 = new Web3(window.ethereum);
         try {
           // Request account access if needed
-          await window.ethereum.enable();
-          console.log("Web3 enabled");
+          // await window.ethereum.enable();
+          await window.ethereum.request({ method: 'eth_requestAccounts' })
+          console.log("Web3 enabled.");
           // Accounts now exposed
           resolve(web3);
         } catch (error) {
@@ -35,15 +36,3 @@ const getWeb3 = () =>
   });
  
 export default getWeb3;
-
-// if (window.ethereum) {
-//   try {
-//     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-//     console.log("Web3 enabled");
-    
-//   } catch (error) {
-//     if (error.code === 4001) {
-//       // User rejected request
-//     }
-//   }
-// }
