@@ -314,7 +314,7 @@ export async function validateNFTupload(metadata) {
     console.log("Upload check: ", check);
     if (check) {
         const status = await nftStorage.status(cid);
-        console.log("NFT status: ", status);
+        console.log("NFT status check: ", status);
     }
 }
 
