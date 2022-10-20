@@ -13,12 +13,3 @@ There's a specific way to launch everything in /supp_chain:
 7. connect the ganache account/s on metamask to 8545
 8. (optional) add the truffle-config.js file to ganache for transaction data
 9. click the add item button and it should fire up metamask, and stuff on the console
-
-
-The current stub implementation has 3 things:
-- 1 Item contract to kept track of the items details (name of item, price, stage in supply chain)
-- 1 ItemManager contract to keep track of created Items
-
-You can successfully create an item with a price from the frontend, which creates a an Item contract and adds it as a mapping in the ItemManager contract.
-
-You can pay the contract the price specified when creating the item, and the console tells you if the item moves to next stage (or if you've have already paid for the item/ or you haven’t paid enough)
