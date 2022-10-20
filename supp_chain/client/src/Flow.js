@@ -1,7 +1,7 @@
-import { useEffect, useState} from 'react';
+import { useEffect} from 'react';
 import ReactFlow, { ReactFlowProvider, useReactFlow, Controls, Background, MiniMap } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { nodes, edges, updateFlow } from './Composable.js'
+import { nodes, edges } from './Composable.js'
 
   const edgeOptions = {
       animated: true,
@@ -57,58 +57,3 @@ import { nodes, edges, updateFlow } from './Composable.js'
   }
   
   export default FlowWithProvider;
-
-
-
-/*
-  NodeChange:
-
-    type NodeRemoveChange = {
-    id: string;
-    type: 'remove';
-    };
-
-    type NodeAddChange<NodeData = any> = {
-      item: Node<NodeData>;
-      type: 'add';
-    };
-
-    type NodeResetChange<NodeData = any> = {
-      item: Node<NodeData>;
-      type: 'reset';
-    };
-
-
-  EdgeChange:
-
-    type EdgeSelectionChange = NodeSelectionChange;
-    type EdgeRemoveChange = NodeRemoveChange;
-    type EdgeAddChange<EdgeData = any> = {
-      item: Edge<EdgeData>;
-      type: 'add';
-    };
-    type EdgeResetChange<EdgeData = any> = {
-      item: Edge<EdgeData>;
-      type: 'reset';
-    };
-    type EdgeChange = EdgeSelectionChange | EdgeRemoveChange | EdgeAddChange | EdgeResetChange;
-
-
-  onNodesChange​:
-
-    Description:
-    Called on drag, select and remove - handler for adding interactivity for a controlled flow
-    Type:
-    (nodeChanges: NodeChange[]) => void
-    Default:
-    undefined
-    onEdgesChange​
-
-  onEdgesChange: 
-    Description:
-    Called on select and remove - handler for adding interactivity for a controlled flow
-    Type:
-    (edgeChanges: EdgeChange[]) => void
-    Default:
-    undefined
-*/

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,7 +7,6 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import ERC998ERC1155TopDownPresetMinterPauser from "./contracts/ERC998ERC1155TopDownPresetMinterPauser.json";
-import ERC998ERC1155TopDown from "./contracts/ERC998ERC1155TopDown.json";
 import ERC1155PresetMinterPauser from "./contracts/ERC1155PresetMinterPauser.json";
 import getWeb3 from "./getWeb3"; 
 import "./App.css";
@@ -20,12 +19,10 @@ function App() {
     const [parentTokenID2, setParentTokenID2] = useState(0);
     const [childTokenID, setChildTokenID] = useState(0);
     const [numChildTokens, setNumChildTokens] = useState(0);
-    const [loaded, setLoaded] = useState(false);
     const [web3, setWeb3] = useState("undefined");
     const [accounts, setAccount] = useState("");
     const [networkId, setNetworkId] = useState("");
     const [erc998Minter, setERC998Minter] = useState("");
-    const [erc998TD, setERC998TD] = useState("");
     const [erc1155Minter, setERC1155Minter] = useState("");
     const [mintParentOpen, setMintParentOpen] = useState(false);
     const [mintChildOpen, setMintChildOpen] = useState(false);
@@ -146,20 +143,11 @@ function App() {
             );
             setERC998Minter(thisERC998ERC1155TopDownPresetMinterPauser);
 
-            const thisERC998ERC1155TopDown = new web3.eth.Contract(
-                ERC998ERC1155TopDown.abi,
-                ERC998ERC1155TopDown.networks[networkId] && ERC998ERC1155TopDown.networks[networkId].address,
-            );
-            setERC998TD(thisERC998ERC1155TopDown);
-
             const thisERC1155PresetMinterPauser = new web3.eth.Contract(
                 ERC1155PresetMinterPauser.abi,
                 ERC1155PresetMinterPauser.networks[networkId] && ERC1155PresetMinterPauser.networks[networkId].address,
             );
             setERC1155Minter(thisERC1155PresetMinterPauser);
-
-
-            setLoaded(true);
 
         } catch (error) {
             alert(`Failed to load web3, accounts, or contract. Check console for details.`,);

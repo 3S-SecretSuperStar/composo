@@ -97,11 +97,11 @@ export function get_ipfs_link(acc, tokenID) {
 export function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
     // using nft.storage ipfs subdomain since we're using it's API for faster data retreival
-    var ipfs_link = ipfs_link.replace("ipfs://", "https://nftstorage.link/ipfs/");
+    var nftstorage_ipfs_link = ipfs_link.replace("ipfs://", "https://nftstorage.link/ipfs/");
     if (!composable[owner_addr]) composable[owner_addr] = {};
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
     if (!composable[owner_addr][tokenID]["metadata"]) composable[owner_addr][tokenID]["metadata"] = {};
-    composable[owner_addr][tokenID]["metadata"] = ipfs_link;
+    composable[owner_addr][tokenID]["metadata"] = nftstorage_ipfs_link;
 
     console.log("updated token's ipfs.");
 
@@ -325,6 +325,8 @@ export function getEdges() {
     for (var contract_address in composable) {
         for (var token in composable[contract_address]) {
             for (var child_array in composable[contract_address][token]["children"]) {
+                console.log("child array: ", child_array);
+                console.log("child array[1]: ", child_array[1]);
                 edge = {};
                 edge.id = token + "-" + composable[contract_address][token]["children"][child_array][1];
                 //console.log("Edge ID added: ", edge.id);
@@ -337,6 +339,8 @@ export function getEdges() {
             }
         }
     }
+
+    console.log(edges)
     return edges;
 }
 
