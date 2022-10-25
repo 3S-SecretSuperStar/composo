@@ -1,7 +1,6 @@
 import gateways from './cacher/gateways.json';
 import $ from 'jquery';
 import { NFTStorage } from "nft.storage";
-import { MarkerType, Position } from 'reactflow';
 
 const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
 
@@ -381,12 +380,12 @@ export async function getNodes() {
     for (var contractAddress in composable) {
         var j = 0;
         for (var tokenID in composable[contractAddress]) {
-            // var metadata = await get_token_metadata(contractAddress, tokenID);
+            var metadata = await get_token_metadata(contractAddress, tokenID);
             node = {};
             node.id = tokenID;
             node.type = "custom";
             node.position = { x: 25+(j*200), y: 25+(i*125) };
-            node.data = { label: tokenID };
+            node.data = { label: tokenID,  name: metadata.name };
             nodes.push(node);
             j++;
         }
