@@ -381,11 +381,12 @@ export async function getNodes() {
         var j = 0;
         for (var tokenID in composable[contractAddress]) {
             var metadata = await get_token_metadata(contractAddress, tokenID);
+            var link = get_ipfs_link(contractAddress, tokenID);
             node = {};
             node.id = tokenID;
             node.type = "custom";
             node.position = { x: 25+(j*200), y: 25+(i*125) };
-            node.data = { label: tokenID,  name: metadata.name };
+            node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage};
             nodes.push(node);
             j++;
         }
