@@ -384,7 +384,7 @@ export async function getNodes() {
             node = {};
             node.id = tokenID;
             node.type = "custom";
-            node.position = { x: 25+(j*200), y: 25+(i*125) };
+            node.position = { x: 25+(j*250), y: 25+(i*175) };
             node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  owner_address: metadata.owner_address, recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage};
             nodes.push(node);
             j++;
@@ -411,6 +411,7 @@ export function getEdges() {
                 edge.target = composable[contract_address][token]["children"][child_data][1];
                 edge.label = "owns";
                 edge.type = "default";
+                edge.sourceHandle = token;
                 edge.labelShowBG = false;
                 edge.animated = true;
                 edges.push(edge);
