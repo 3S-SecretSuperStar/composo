@@ -1,0 +1,67 @@
+.react-flow__node-custom {
+    font-size: 10px;
+    width: 100px;
+    color: #fff;
+    background: rgba( 0, 0, 0, 0.55 );
+    /*box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );*/
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
+    backdrop-filter: blur( 7.5px );
+    -webkit-backdrop-filter: blur( 7.5px );
+    border-radius: 10px;
+
+
+  }
+  
+  .react-flow__node-custom .react-flow__handle {
+    top: 24px;
+    right: -15px;
+    width: 6px;
+    height: 10px;
+    border-radius: 2px;
+    background-color: #778899;
+  }
+  
+  .react-flow__node.circle {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    fontweight: 700;
+  }
+  
+  .react-flow__node.annotation {
+    border-radius: 0;
+    text-align: left;
+    background: white;
+    border: none;
+    line-height: 1.4;
+    width: 225px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
+  }
+  
+  .react-flow__node.annotation .react-flow__handle {
+    display: none;
+  }
+  
+  .custom-node__header {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .custom-node__body {
+    padding: 10px;
+  }
+  
+  .custom-node__select {
+    position: relative;
+    margin-bottom: 10px;
+  }
+  
+  .custom-node__select select {
+    width: 100%;
+    margin-top: 5px;
+    font-size: 10px;
+  }
+  

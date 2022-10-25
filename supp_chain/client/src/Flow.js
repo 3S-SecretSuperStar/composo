@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 import ReactFlow, { ReactFlowProvider, useReactFlow, Controls, Background, MiniMap } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nodes, edges } from './Composable.js'
+import CustomNode from './CustomNode';
+import './overview.css';
+  
+  const nodeTypes = {
+    custom: CustomNode,
+  };
 
   const edgeOptions = {
       animated: true,
@@ -39,6 +45,7 @@ import { nodes, edges } from './Composable.js'
           backgroundColor: '#0F2027',
           backdropFilter: 'blur(20px)',
         }}
+        nodeTypes={nodeTypes}
         connectionLineStyle={connectionLineStyle}
       >
         <MiniMap style={minimapStyle} />
