@@ -1,58 +1,20 @@
 import React, { memo } from 'react';
-import { Handle, useReactFlow, useStoreApi } from 'reactflow';
+import { get_composable_contract, get_token_metadata } from './Composable';
 
-const options = [
-  {
-    value: 'smoothstep',
-    label: 'Smoothstep',
-  },
-  {
-    value: 'step',
-    label: 'Step',
-  },
-  {
-    value: 'default',
-    label: 'Bezier (default)',
-  },
-  {
-    value: 'straight',
-    label: 'Straight',
-  },
-];
+function CustomNode({ id }) {
 
-function Select({ value, handleId, nodeId }) {
-  const { setNodes } = useReactFlow();
-  const store = useStoreApi();
+    var acc = get_composable_contract(id);
+    var metadata = get_token_metadata(acc ,id);
+    console.log("name: ", metadata.name);
 
-  const onChange = (evt) => {
-    const { nodeInternals } = store.getState();
-    setNodes(
-      Array.from(nodeInternals.values()).map((node) => {
-        if (node.id === nodeId) {
-          node.data = {
-            ...node.data,
-            selects: {
-              ...node.data.selects,
-              [handleId]: evt.target.value,
-            },
-          };
-        }
-
-        return node;
-      })
-    );
-  };
-
-}
-
-function CustomNode({ id, data }) {
   return (
     <>
         <div className="custom-node__header">
-            This is a <strong>custom node</strong>
+            Token Id: <strong>{id}</strong>.
+            Token Name: <strong>{metadata.name}</strong>.
         </div>
         <div className="custom-node__body">
-            WooooHOOOOOO
+            Insert metadata about token.
         </div>
     
     </>

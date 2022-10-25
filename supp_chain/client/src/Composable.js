@@ -90,6 +90,19 @@ export function get_composable_structure() {
     return composable;
 }
 
+// *** assumes 1155 and 998's will all have different tokenIDs -- for now ***
+export function get_composable_contract(tokenID) {
+ 
+    for (var acc in composable) {
+        if (tokenID in composable[acc]) {
+           return acc;
+        }
+    }
+
+    return null;
+
+}
+
 // ---------------------- IPFS export functions ----------------------
 
 export function get_ipfs_link(acc, tokenID) {
