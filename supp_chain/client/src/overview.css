@@ -2,11 +2,11 @@
     font-size: 10px;
     width: 100px;
     color: #fff;
-    background: rgba( 0, 0, 0, 0.55 );
+    background: rgba( 0, 0, 0, 0.35 );
     /*box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );*/
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
-    backdrop-filter: blur( 7.5px );
-    -webkit-backdrop-filter: blur( 7.5px );
+    backdrop-filter: blur( 0.95px );
+    -webkit-backdrop-filter: blur( 0.95px );
     border-radius: 10px;
 
 
