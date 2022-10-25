@@ -88,8 +88,7 @@ function App() {
                 description: "description about the NFT.",
                 image: blob,
                 properties: {
-                    ownership_stage: "composable asset supply chain stage",
-                    contract_address: "owner contract address", 
+                    ownership_stage: "supply chain stage",
                     recycled: "boolean - true/false",
               
                     parent_tokens: [

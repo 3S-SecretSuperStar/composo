@@ -308,8 +308,7 @@ export async function updateNFT(metadata) {
                 description: "description about the NFT.",
                 image: blob,
                 properties: {
-                    ownership_stage: "composable asset supply chain stage",
-                    contract_address: "owner contract address", 
+                    ownership_stage: "supply chain stage",
                     recycled: "boolean - true/false",
                     parent_tokens: metadata["properties"]["parent_tokens"],
                     child_tokens: metadata["properties"]["child_tokens"],
@@ -386,7 +385,7 @@ export async function getNodes() {
             node.id = tokenID;
             node.type = "custom";
             node.position = { x: 25+(j*200), y: 25+(i*125) };
-            node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage};
+            node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  owner_address: metadata.owner_address, recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage};
             nodes.push(node);
             j++;
         }
