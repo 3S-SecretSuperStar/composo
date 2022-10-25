@@ -328,7 +328,7 @@ export async function cache_cid(cid) {
     let l = cid.replace("/metadata.json", "");
     // console.
 
-    console.log("Attempting to cache CID on some public gatways...", cid);;
+    console.log("Attempting to cache CID on some public gatways...");
     // loop through gateways
     for (var i = 0; i < gateways.length ; i++) {
         
