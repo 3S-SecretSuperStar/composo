@@ -314,19 +314,14 @@ export async function updateNFT(metadata) {
 
 // ---------------------- CACHING OPTIMIZATION export functions ----------------------
 
-// upload to ipfs button in: https://natoboram.gitlab.io/public-gateway-cacher/
+// inspired by: https://natoboram.gitlab.io/public-gateway-cacher/
 
-// cache a specific IPFS hash to a bunch of public gateways, for faster retrieval
+// cache a specific IPFS hash to a bunch of public gateways, for faster file retrieval
 export async function cache_cid(cid) {
 
-    // var ipfsLink = "";
-    // function set_url(url) {
-    //     console.log("INSIDE: ", url)
-    //     ipfsLink = url;
-    // }
     let res = "";
     let l = cid.replace("/metadata.json", "");
-    // console.
+ 
 
     console.log("Attempting to cache CID on some public gatways...");
     // loop through gateways
@@ -345,7 +340,6 @@ export async function cache_cid(cid) {
             if (response.status === 200) {
                 console.log("Successfully cached CID on gateway: ", response.url);
                 //console.log('response.status: ', response.status); 
-                // set_url(response.url);
                 return response.url;
             }
         });
@@ -376,7 +370,7 @@ export async function getNodes() {
             node = {};
             node.id = tokenID;
             node.position = {};
-            node.position = { x: 100+(i*50), y: 100+(i*50)+(j*100) };
+            node.position = { x: 25+(j*200), y: 25+(i*125) };
             node.data = {"label": tokenID};
             nodes.push(node);
             j++;
