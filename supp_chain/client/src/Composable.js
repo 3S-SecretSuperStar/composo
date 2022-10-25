@@ -117,11 +117,10 @@ export async function get_token_metadata(acc, tokenID) {
 export function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
     // using nft.storage ipfs subdomain since we're using it's API for faster data retreival
-    var nftstorage_ipfs_link = ipfs_link.replace("ipfs://", "https://nftstorage.link/ipfs/");
     if (!composable[owner_addr]) composable[owner_addr] = {};
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
     if (!composable[owner_addr][tokenID]["metadata"]) composable[owner_addr][tokenID]["metadata"] = {};
-    composable[owner_addr][tokenID]["metadata"] = nftstorage_ipfs_link;
+    composable[owner_addr][tokenID]["metadata"] = ipfs_link;
 
     console.log("generated/updated token's ipfs.");
 
@@ -149,10 +148,11 @@ export async function add_parent_ipfs(parentAcc, parentTokenID, childAcc, childT
     metadata["properties"]["child_tokens"].push({"contract_address": childAcc, "token_id": childTokenID, "num_tokens": childTokens});
 
     console.log ("generating updated parent token's ipfs...");
-    var updated = await updateNFT(metadata);
+    var url = await updateNFT(metadata);
+
     console.log ("updated parent ipfs.");
 
-    update_ipfs(parentAcc, parentTokenID, updated.url);
+    update_ipfs(parentAcc, parentTokenID, url);
 }
 
 
@@ -169,10 +169,10 @@ export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, chi
     
 
     console.log ("generating updated parent token's ipfs...");
-    var updated = await updateNFT(metadata);
+    var url = await updateNFT(metadata);
     console.log ("updated parent ipfs.");
 
-    update_ipfs(parentAcc, parentTokenID, updated.url);
+    update_ipfs(parentAcc, parentTokenID, url);
 }
 
 
@@ -193,10 +193,10 @@ export async function update_child_ipfs_transfer(parentAcc, parentTokenID, paren
     metadata["properties"]["parent_tokens"].push({"contract_address": parentAcc2, "token_id": parentTokenID2});
 
     console.log ("generating updated child token's ipfs...");
-    var updated = await updateNFT(metadata);
+    var url = await updateNFT(metadata);
     console.log ("updated child ipfs.");
 
-    update_ipfs(childAcc, childTokenID, updated.url);
+    update_ipfs(childAcc, childTokenID, url);
 }
 
 
@@ -302,7 +302,9 @@ export async function updateNFT(metadata) {
                 }
             });
 
-            return updated_metadata;
+            var url = await cache_cid(updated_metadata.url.replace("ipfs://", ""));
+
+            return url;
 
         } catch (error) {
             console.error(error);
@@ -330,7 +332,7 @@ export async function cache_cid(cid) {
     // loop through gateways
     for (var i = 0; i < gateways.length ; i++) {
         
-        console.log("Trying to cache link: ", gateways[i] + "ipfs/"+ cid);
+        //console.log("Trying to cache link: ", gateways[i] + "ipfs/"+ cid);
         res = fetch(
             "https://" + l + ".ipfs.nftstorage.link/metadata.json", {
             method: "GET",
@@ -339,27 +341,15 @@ export async function cache_cid(cid) {
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "en-US,en;q=0.5"
             },
-        }).then((response, flag) => {
+        }).then((response) => {
             if (response.status === 200) {
                 console.log("Successfully cached CID on gateway: ", response.url);
-                console.log('response.status: ', response.status); 
+                //console.log('response.status: ', response.status); 
                 // set_url(response.url);
                 return response.url;
             }
         });
-        // .then((url) => {
-        //     const error = new Error("BBB");
-        //     throw error;
-        // }).then((url) => {
-        //     console.log("");
-        // }).catch((error) => {
-        //     console.log("");
-        // });
-        
     }
-
-    // return ipfsLink;
-    // return r;
     return res;
 
 

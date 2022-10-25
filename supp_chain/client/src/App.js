@@ -109,7 +109,9 @@ function App() {
                 }
             });
 
-            return metadata;
+            var url = await Composable.cache_cid(metadata.url.replace("ipfs://", ""));
+            
+            return url;
               
     
         } catch (error) {
@@ -166,9 +168,8 @@ function App() {
             from: accounts[0] });  
         console.log(result);
             
-        var metadata = await uploadNFT();
+        var url = await uploadNFT();
 
-        var url = await Composable.cache_cid(metadata.url.replace("ipfs://", ""));
         console.log("USED URL:", url);
 
         Composable.update_ipfs(accounts[0], tokenID, url);
@@ -201,8 +202,7 @@ function App() {
         Composable.setNumTokens(0);
         Composable.child_to_update();
         console.log("Generating and uploading child token metadata...");
-        var metadata = await uploadNFT();
-        var url = await Composable.cache_cid(metadata.url.replace("ipfs://", ""));
+        var url = await uploadNFT();
         Composable.setNumTokens(numChildTokens);
 
         // save ipfs link of child w parent addr + token mapping
