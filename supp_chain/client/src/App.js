@@ -16,6 +16,16 @@ import * as Composable from './Composable.js'
 const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
 
 function App() {
+
+    const SUPP_DRIVERS = {
+        RAW_MATERIALS: "Raw Materials",
+        SUPPLIER: "Supplier",
+        MANUFACTURER: "Manufacturer",
+        DISTRIBUTER: "Distributer",
+        RETAILER: "RETAILER",
+        CONSUMER: "Consumer"
+    };
+
     const [tokenID, setTokenID] = useState(0);
     const [parentTokenID, setParentTokenID] = useState(0);
     const [parentTokenID2, setParentTokenID2] = useState(0);
@@ -31,6 +41,11 @@ function App() {
     const [mintChild998Open, setMintChild998Open] = useState(false);
     const [transferChild, setTransferChild] = useState(false);
     const [tokenName, setTokenName] = useState("");
+    const [tokenSuppDeets, setTokenSuppDeets] = useState({
+        stage: SUPP_DRIVERS.RAW_MATERIALS,
+        recycled: "", 
+        description: ""
+    });
 
 
     function setNullState() {
@@ -85,11 +100,11 @@ function App() {
                 token_id: token_id,
                 owner_address: owner_address,
                 name: tokenName, 
-                description: "description about the NFT.",
+                description: tokenSuppDeets.description,
                 image: blob,
                 properties: {
-                    ownership_stage: "supply chain stage",
-                    recycled: "boolean - true/false",
+                    ownership_stage: tokenSuppDeets.stage,
+                    recycled: tokenSuppDeets.recycled,
               
                     parent_tokens: [
                       {
@@ -305,6 +320,18 @@ function App() {
         if(name === "childTokenID"){
             setChildTokenID(value);
         }
+
+        if(name === "tokenSuppDeetsRecycle"){
+            setTokenSuppDeets(prevState => ({
+                recycled : value
+              }))
+        }
+
+        if(name === "tokenSuppDeetsDesc"){
+            setTokenSuppDeets(prevState => ({
+                description : value
+              }))
+        }
     }
 
     const handleClickOpen = (event) => {
@@ -357,7 +384,7 @@ function App() {
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    Please enter a name and tokenId for the creation of this NFT.
+                    Please enter a name and tokenId for the creation of this NFT. This creates a new ERC-998 token, that can represent the highest level of a composable structure of a supply chain good/product.
                 </DialogContentText>
                 <TextField
                     required
@@ -369,6 +396,18 @@ function App() {
                     required
                     label="Token ID"
                     name="tokenID"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="Recycle Status"
+                    name="tokenSuppDeetsRecycle"
+                    onChange={handleInputChange}
+                />
+                 <TextField
+                    required
+                    label="Product Description"
+                    name="tokenSuppDeetsDesc"
                     onChange={handleInputChange}
                 />
                 </DialogContent>
