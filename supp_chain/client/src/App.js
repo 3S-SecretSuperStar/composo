@@ -401,13 +401,13 @@ function App() {
     
 
     return (
-        <div>
+        <>
             <MintButton variant="contained" onClick={handleClickOpen} value="parent" >Mint Parent</MintButton>
             <Dialog open={mintParentOpen} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    <div>Please enter a name, tokenID and other product details for the creation of this NFT. This creates a new ERC-998 token, that can represent the highest level of a composable structure of a supply chain good/product.</div>
+                    Please enter a name, tokenID and other product details for the creation of this NFT. This creates a new ERC-998 token, that can represent the highest level of a composable structure of a supply chain good/product.
                 </DialogContentText>
                 <TextField
                     required
@@ -565,7 +565,7 @@ function App() {
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
-            </div>  
+        </>  
     ); 
 
 };
