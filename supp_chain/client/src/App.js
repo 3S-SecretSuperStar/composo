@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { styled } from '@mui/material/styles';
+import {blue, blueGrey, lime, grey, common, deepOrange, deepPurple, teal, indigo} from '@mui/material/colors';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -12,6 +14,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 import { NFTStorage } from "nft.storage";
 import * as Composable from './Composable.js'
+import './buttonStyles.css';
 
 const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
 
@@ -379,9 +382,27 @@ function App() {
         }
     };
 
+    const MintButton = styled(Button)(({ theme }) => ({
+        color: theme.palette.getContrastText(blueGrey[500]),
+        backgroundColor: blueGrey[500],
+        '&:hover': {
+          backgroundColor: teal[700],
+        },
+    }));
+
+    const TransferButton = styled(Button)(({ theme }) => ({
+        color: theme.palette.getContrastText(blue[500]),
+        backgroundColor: blueGrey[500],
+        '&:hover': {
+          backgroundColor: indigo[600],
+        },
+    }));
+    
+    
+
     return (
         <div>
-            <Button variant="outlined" onClick={handleClickOpen} value="parent">Mint Parent</Button>
+            <MintButton variant="contained" onClick={handleClickOpen} value="parent" >Mint Parent</MintButton>
             <Dialog open={mintParentOpen} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
@@ -419,7 +440,7 @@ function App() {
                 </DialogActions>
             </Dialog>
 
-            <Button variant="outlined" onClick={handleClickOpen} value="child">Mint Child</Button>
+            <MintButton variant="contained" onClick={handleClickOpen} value="child">Mint Child</MintButton>
             <Dialog open={mintChildOpen} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
@@ -469,7 +490,7 @@ function App() {
                 </DialogActions>
             </Dialog>
 
-            <Button variant="outlined" onClick={handleClickOpen} value="transfer">Transfer Child</Button>
+            <TransferButton variant="contained" onClick={handleClickOpen} value="transfer">Transfer Child</TransferButton>
             <Dialog open={transferChild} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
@@ -501,7 +522,7 @@ function App() {
                 </DialogActions>
             </Dialog>
 
-            <Button variant="outlined" onClick={handleClickOpen} value="child998">Mint Child 998</Button>
+            <MintButton variant="contained" onClick={handleClickOpen} value="child998">Mint Child 998</MintButton>
             <Dialog open={mintChild998Open} onClose={handleClose}>
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>

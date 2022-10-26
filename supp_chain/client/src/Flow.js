@@ -3,7 +3,7 @@ import ReactFlow, { ReactFlowProvider, useReactFlow, Controls, Background, MiniM
 import 'reactflow/dist/style.css';
 import { nodes, edges } from './Composable.js'
 import CustomNode from './CustomNode';
-import './overview.css';
+import './nodeStyles.css';
   
   const nodeTypes = {
     custom: CustomNode,

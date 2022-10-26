@@ -8,8 +8,6 @@
     backdrop-filter: blur( 1.1px );
     -webkit-backdrop-filter: blur( 1.1px );
     border-radius: 10px;
-
-
   }
   
   .react-flow__node-custom .react-flow__handle {
