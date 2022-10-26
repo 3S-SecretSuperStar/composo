@@ -349,7 +349,7 @@ export async function cache_cid(cid) {
             },
         }).then((response) => {
             if (response.status === 200) {
-                console.log("Successfully cached CID on gateway: ", response.url);
+                //console.log("Successfully cached CID on gateway: ", response.url);
                 //console.log('response.status: ', response.status); 
                 return response.url;
             }
@@ -391,7 +391,7 @@ export async function getNodes() {
         i++;
     }
 
-    window.sessionStorage.persistent_nodes = JSON.stringify(nodes);
+    window.sessionStorage.nodes = JSON.stringify(nodes);
 
     return nodes;
 
@@ -420,7 +420,7 @@ export function getEdges() {
         }
     }
 
-    window.sessionStorage.persistent_edges = JSON.stringify(edges);
+    window.sessionStorage.edges = JSON.stringify(edges);
 
 
     return edges;

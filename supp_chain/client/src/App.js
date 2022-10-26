@@ -189,8 +189,6 @@ function App() {
             
         var url = await uploadNFT();
 
-        console.log("USED URL:", url);
-
         Composable.update_ipfs(accounts[0], tokenID, url);
 
         console.log("composable after minting: ", Composable.get_composable_structure());

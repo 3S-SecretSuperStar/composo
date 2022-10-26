@@ -27,9 +27,19 @@ import './nodeStyles.css';
   const ReactFlowInstance = useReactFlow();
   
     useEffect(() => {
+
       const interval = setInterval(() => {
-        ReactFlowInstance.setNodes(nodes);
-        ReactFlowInstance.setEdges(edges);
+
+        // call setNodes and setEdges with sessionStorage (to handle page reloads)
+        if (sessionStorage.getItem('nodes') || sessionStorage.getItem('edges')) {
+          ReactFlowInstance.setNodes(JSON.parse(sessionStorage.getItem('nodes')));
+          ReactFlowInstance.setEdges(JSON.parse(sessionStorage.getItem('edges')));
+        }
+
+        else {
+          ReactFlowInstance.setNodes(nodes);
+          ReactFlowInstance.setEdges(edges);
+        }
         //console.log("Flow structure: ", updateFlow())
       }, 2000);
       return () => clearInterval(interval);
