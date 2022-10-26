@@ -386,7 +386,7 @@ function App() {
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    Please enter a name and tokenId for the creation of this NFT. This creates a new ERC-998 token, that can represent the highest level of a composable structure of a supply chain good/product.
+                    <div>Please enter a name, tokenID and other product details for the creation of this NFT. This creates a new ERC-998 token, that can represent the highest level of a composable structure of a supply chain good/product.</div>
                 </DialogContentText>
                 <TextField
                     required
@@ -424,7 +424,7 @@ function App() {
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    Please enter a name, tokenId and amount of tokens for the child NFT.
+                    Please enter a name, tokenId, amount of tokens and other product details for a child ERC-1155 NFT. The parent will be an ERC-998 token.
                 </DialogContentText>
                 <TextField
                     required
@@ -474,7 +474,7 @@ function App() {
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    Please enter parent token ID you want to transfer the child to.
+                    Please enter the parent and child token ID, and the parent token ID you want to transfer the child ERC-1155 token to.
                 </DialogContentText>
                 <TextField
                     required
@@ -506,7 +506,7 @@ function App() {
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    Mint Child 998 Token
+                    Mint a child ERC-998 token for a ERC-998 parent token. Allows for sub-composable structures to be created, for more complex prodcts or goods.
                 </DialogContentText>
                 <TextField
                     required
