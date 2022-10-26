@@ -323,14 +323,16 @@ function App() {
 
         if(name === "tokenSuppDeetsRecycle"){
             setTokenSuppDeets(prevState => ({
+                ...prevState,
                 recycled : value
-              }))
+            }))
         }
 
         if(name === "tokenSuppDeetsDesc"){
             setTokenSuppDeets(prevState => ({
+                ...prevState,
                 description : value
-              }))
+            }))
         }
     }
 
