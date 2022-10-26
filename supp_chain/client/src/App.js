@@ -14,7 +14,7 @@ import ERC1155PresetMinterPauser from "./contracts/ERC1155PresetMinterPauser.jso
 import getWeb3 from "./getWeb3"; 
 import "./App.css";
 import { NFTStorage } from "nft.storage";
-import * as Composable from './Composable.js'
+import * as Composable from './Composable_session.js'
 import './buttonStyles.css';
 
 const nftStorage = new NFTStorage({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGNEYTZDMTE0QzkwMUY1RmEyNEYwOTc0ZWM4ZGJlY0I0YzdEQkUxZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MzU5Mjk5MTUwNywibmFtZSI6InRlc3QifQ._LYiNUkFKxwYCFzO06X6zGAxDrTz6EKp25JvA5J1IE0'});
@@ -180,6 +180,8 @@ function App() {
 
     const mintToken = async () => {
         console.log("Minting 998-parent token...");
+        console.log("Local Structure: ", Composable.get_composable_structure());
+        console.log("Persistent Structure: ", Composable.get_composable_session());
 
         
         setMintParentOpen(false);
@@ -191,7 +193,9 @@ function App() {
 
         Composable.update_ipfs(accounts[0], tokenID, url);
 
-        console.log("composable after minting: ", Composable.get_composable_structure());
+        console.log("after minting...");
+        console.log("Local Structure: ", Composable.get_composable_structure());
+        console.log("Persistent Structure: ", Composable.get_composable_session());
         Composable.updateFlow();
     }
 

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import ReactFlow, { ReactFlowProvider, useReactFlow, Controls, Background, MiniMap } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { nodes, edges } from './Composable.js'
+import { nodes, edges, get_composable_structure } from './Composable_session.js'
 import CustomNode from './CustomNode';
 import './nodeStyles.css';
   
@@ -29,6 +29,9 @@ import './nodeStyles.css';
     useEffect(() => {
 
       const interval = setInterval(() => {
+
+        //console.log("Persistent Structure: ", get_composable_structure());
+
 
         // call setNodes and setEdges with sessionStorage (to handle page reloads)
         if (sessionStorage.getItem('nodes') || sessionStorage.getItem('edges')) {

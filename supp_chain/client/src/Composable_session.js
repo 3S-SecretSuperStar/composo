@@ -86,11 +86,34 @@ export function get_composable_structure() {
     return composable;
 }
 
+export function get_composable_session() {
+    return JSON.parse(sessionStorage.getItem('composable'));
+}
+
+export function set_composable_session() {
+    // if session storage is empty, set it to the new composable
+    // else merge the new composable with the old one
+
+    if (sessionStorage.getItem('composable') == null) {
+        sessionStorage.setItem('composable', JSON.stringify(composable));
+    }
+
+    else {
+        var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+        var merged_composable = {...old_composable, ...composable};
+        sessionStorage.setItem('composable', JSON.stringify(merged_composable));
+    }
+}
+
+
+
 // ---------------------- IPFS export functions ----------------------
 
 export function get_ipfs_link(acc, tokenID) {
-    return composable[acc][tokenID]["metadata"];
+    return JSON.parse(sessionStorage.getItem('composable'))[acc][tokenID]["metadata"];
 }
+
+
 
 export async function get_token_metadata(acc, tokenID) {
     var url = get_ipfs_link(acc, tokenID);
@@ -121,6 +144,8 @@ export function update_ipfs(owner_addr, tokenID, ipfs_link) {
     composable[owner_addr][tokenID]["metadata"] = ipfs_link;
 
     console.log("generated/updated token's ipfs.");
+
+    set_composable_session()
 
     
 }
@@ -209,6 +234,8 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
 
     console.log("updated token's parents.");
 
+    set_composable_session()
+
     
 }
 
@@ -219,6 +246,8 @@ export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_t
     catch {
         console.error("error removing parent mapping.");
     }
+
+    set_composable_session()
 
     
 }
@@ -231,6 +260,8 @@ export function add_children_mapping(owner_addr, tokenID, child_addr, child_toke
     composable[owner_addr][tokenID]["children"].push([child_addr, child_tokenID, child_tokens]);
 
     console.log("updated token's children.");
+
+    set_composable_session()
 
     
 }
@@ -245,6 +276,7 @@ export function remove_children_mapping(owner_addr, tokenID, child_addr, child_t
         console.error("error removing child mapping.");
     }
 
+    set_composable_session()
     
 }
 
@@ -269,7 +301,7 @@ export async function update_parent(parentAcc, parentTokenID, childAcc, childTok
         remove_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID);
     }
 
-    
+    set_composable_session()
 
     return true;
 }
@@ -283,7 +315,7 @@ export async function update_transferred_child(parentAcc, parentTokenID, parentA
     remove_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
     add_parent_mapping(childAcc, childTokenID, parentAcc2, parentTokenID2);
 
-    
+    set_composable_session()
 
     return true;
 }
@@ -365,7 +397,7 @@ export var edges = [];
 
 export async function getNodes() {
     var node = {};
-    var composable = get_composable_structure();
+    var composable = get_composable_session();
    
     // get tokenID and contract address of each token, and add tokenID as id and label
     // i and j increments for position shift
@@ -395,7 +427,7 @@ export async function getNodes() {
 // get children of each tokenID from composable and add to edges
 export function getEdges() {
     var edge = {};
-    var composable = get_composable_structure();
+    var composable = get_composable_session();
     for (var contract_address in composable) {
         for (var token in composable[contract_address]) {
             for (var child_data in composable[contract_address][token]["children"]) {
