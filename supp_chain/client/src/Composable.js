@@ -30,7 +30,6 @@ import { NFTStorage } from "nft.storage";
         // generate new parent ipfs with corr. child addr and token
         // update parent ipfs in dict
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export var composable = {};
 
@@ -368,7 +367,6 @@ export var edges = [];
 
 
 export async function getNodes() {
-    nodes = [];
     var node = {};
     var composable = get_composable_structure();
    
@@ -399,7 +397,6 @@ export async function getNodes() {
 
 // get children of each tokenID from composable and add to edges
 export function getEdges() {
-    edges = [];
     var edge = {};
     var composable = get_composable_structure();
     for (var contract_address in composable) {
