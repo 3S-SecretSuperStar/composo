@@ -1,11 +1,4 @@
 .button-style-1 {
-    font-size: 9px;
-    color: #fff;
-    background: rgba( 0, 0, 0, 0.15 );
-    /*box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );*/
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 20%), 0 2px 4px -1px rgb(0 0 0 / 30%);
-    backdrop-filter: blur( 1.1px );
-    -webkit-backdrop-filter: blur( 1.1px );
-    border-radius: 10px;
-  }
+    text-align: center;
+}
   

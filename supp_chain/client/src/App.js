@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { styled } from '@mui/material/styles';
 import {blue, blueGrey, lime, grey, common, deepOrange, deepPurple, teal, indigo} from '@mui/material/colors';
+import Fade from '@mui/material/Fade';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -397,17 +398,25 @@ function App() {
           backgroundColor: indigo[600],
         },
     }));
+
+    const DialogBox = styled(Dialog)(({ theme }) => ({
+        background: 'rgba( 255, 255, 255, 0.25 )',
+        boxShadow: '0 8px 32px 0 rgba( 31, 38, 135, 0.37 )',
+        backdropFilter: 'blur( 1px )',
+        borderRadius: '10px',
+        border: '1px solid rgba( 255, 255, 255, 0.18 )',
+    }));
     
     
 
     return (
-        <>
+        <div className="button-style-1">
             <MintButton variant="contained" onClick={handleClickOpen} value="parent" >Mint Parent</MintButton>
-            <Dialog open={mintParentOpen} onClose={handleClose}>
+            <Dialog open={mintParentOpen} onClose={handleClose}> 
                 <DialogTitle>Mint</DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    Please enter a name, tokenID and other product details for the creation of this NFT. This creates a new ERC-998 token, that can represent the highest level of a composable structure of a supply chain good/product.
+                    Please enter a name, tokenID and other product details for the creation of this NFT. This creates a new ERC-998 token, that can represent the highest level of a composable structure of a supply chain good/product.                
                 </DialogContentText>
                 <TextField
                     required
@@ -565,7 +574,7 @@ function App() {
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
-        </>  
+        </div>  
     ); 
 
 };

@@ -43,7 +43,7 @@ import './nodeStyles.css';
         fitView
         style={{
           backgroundColor: '#0F2027',
-          backdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(20px)'
         }}
         nodeTypes={nodeTypes}
         connectionLineStyle={connectionLineStyle}
