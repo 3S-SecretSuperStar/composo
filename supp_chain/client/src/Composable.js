@@ -366,6 +366,7 @@ export async function cache_cid(cid) {
 export var nodes = [];
 export var edges = [];
 
+
 export async function getNodes() {
     nodes = [];
     var node = {};
@@ -389,6 +390,8 @@ export async function getNodes() {
         }
         i++;
     }
+
+    window.sessionStorage.persistent_nodes = JSON.stringify(nodes);
 
     return nodes;
 
@@ -416,6 +419,10 @@ export function getEdges() {
             }
         }
     }
+
+    window.sessionStorage.persistent_edges = JSON.stringify(edges);
+
+
     return edges;
 }
 
