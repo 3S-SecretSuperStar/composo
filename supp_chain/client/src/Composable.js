@@ -305,11 +305,11 @@ export async function updateNFT(metadata) {
                 token_id: metadata["token_id"],
                 owner_address: metadata["owner_address"],
                 name: metadata["name"], 
-                description: "description about the NFT.",
+                description: metadata["description"],
                 image: blob,
                 properties: {
-                    ownership_stage: "supply chain stage",
-                    recycled: "boolean - true/false",
+                    ownership_stage: metadata["ownership_stage"],
+                    recycled: metadata["recycled"],
                     parent_tokens: metadata["properties"]["parent_tokens"],
                     child_tokens: metadata["properties"]["child_tokens"],
                 }

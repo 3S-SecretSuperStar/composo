@@ -450,6 +450,18 @@ function App() {
                     name="numTokens"
                     onChange={handleInputChange}
                 />
+                <TextField
+                    required
+                    label="Recycle Status"
+                    name="tokenSuppDeetsRecycle"
+                    onChange={handleInputChange}
+                />
+                 <TextField
+                    required
+                    label="Product Description"
+                    name="tokenSuppDeetsDesc"
+                    onChange={handleInputChange}
+                />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} value="child">Cancel</Button>
@@ -516,8 +528,14 @@ function App() {
                 />
                 <TextField
                     required
-                    label="Amount of tokens"
-                    name="numTokens"
+                    label="Recycle Status"
+                    name="tokenSuppDeetsRecycle"
+                    onChange={handleInputChange}
+                />
+                 <TextField
+                    required
+                    label="Product Description"
+                    name="tokenSuppDeetsDesc"
                     onChange={handleInputChange}
                 />
                 </DialogContent>
