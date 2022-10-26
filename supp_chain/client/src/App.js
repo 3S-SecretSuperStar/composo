@@ -574,7 +574,7 @@ function App() {
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
             </Dialog>
-        </div>  
+        </>  
     ); 
 
 };

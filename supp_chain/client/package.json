@@ -10,6 +10,7 @@
     "@testing-library/react": "^13.2.0",
     "@testing-library/user-event": "^13.5.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "ipfs-car": "^0.8.1",
     "ipfs-core": "^0.13.0",
     "ipns": "^0.16.0",
