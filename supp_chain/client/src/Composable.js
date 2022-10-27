@@ -385,6 +385,8 @@ export async function getNodes() {
         }
         i++;
     }
+    
+    console.log("Nodes: ", nodes);
 
     window.sessionStorage.nodes = JSON.stringify(nodes);
 
@@ -413,6 +415,8 @@ export function getEdges() {
             }
         }
     }
+
+    console.log("Edges: ", edges);
 
     window.sessionStorage.edges = JSON.stringify(edges);
 

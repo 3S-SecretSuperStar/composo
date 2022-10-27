@@ -98,11 +98,29 @@ export function set_composable_session() {
         sessionStorage.setItem('composable', JSON.stringify(composable));
     }
 
+    // else merge the new composable with the old one, but if a token is already in the old composable, update it with the new one and don't add it again
     else {
         var old_composable = JSON.parse(sessionStorage.getItem('composable'));
-        var merged_composable = {...old_composable, ...composable};
-        sessionStorage.setItem('composable', JSON.stringify(merged_composable));
+        var new_composable = composable;
+
+        for (var owner_addr in new_composable) {
+            if (owner_addr in old_composable) {
+                for (var tokenID in new_composable[owner_addr]) {
+                    if (tokenID in old_composable[owner_addr]) {
+                        old_composable[owner_addr][tokenID] = new_composable[owner_addr][tokenID];
+                    }
+                    else {
+                        old_composable[owner_addr][tokenID] = new_composable[owner_addr][tokenID];
+                    }
+                }
+            }
+            else {
+                old_composable[owner_addr] = new_composable[owner_addr];
+            }
+        }
+        sessionStorage.setItem('composable', JSON.stringify(old_composable));
     }
+    
 }
 
 
@@ -398,8 +416,9 @@ export var edges = [];
 export async function getNodes() {
     var node = {};
     var composable = get_composable_session();
-   
-    // get tokenID and contract address of each token, and add tokenID as id and label
+   console.log("composable Session: ", composable)
+    
+   // get tokenID and contract address of each token, and add tokenID as id and label
     // i and j increments for position shift
     var i = 0;
     for (var contractAddress in composable) {
@@ -417,6 +436,8 @@ export async function getNodes() {
         }
         i++;
     }
+
+    console.log("Nodes: ", nodes);
 
     window.sessionStorage.nodes = JSON.stringify(nodes);
 
@@ -445,6 +466,8 @@ export function getEdges() {
             }
         }
     }
+
+    console.log("Edges: ", edges);
 
     window.sessionStorage.edges = JSON.stringify(edges);
 

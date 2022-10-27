@@ -181,7 +181,7 @@ function App() {
     const mintToken = async () => {
         console.log("Minting 998-parent token...");
         console.log("Local Structure: ", Composable.get_composable_structure());
-        console.log("Persistent Structure: ", Composable.get_composable_session());
+        // console.log("Persistent Structure: ", Composable.get_composable_session());
 
         
         setMintParentOpen(false);
@@ -195,7 +195,7 @@ function App() {
 
         console.log("after minting...");
         console.log("Local Structure: ", Composable.get_composable_structure());
-        console.log("Persistent Structure: ", Composable.get_composable_session());
+        // console.log("Persistent Structure: ", Composable.get_composable_session());
         Composable.updateFlow();
     }
 
