@@ -441,6 +441,7 @@ function App() {
                     <Button onClick={mintToken}>Mint</Button>
                 </DialogActions>
             </Dialog>
+            <span>     </span>
 
             <MintButton variant="contained" onClick={handleClickOpen} value="child">Mint Child</MintButton>
             <Dialog open={mintChildOpen} onClose={handleClose}>
@@ -491,6 +492,7 @@ function App() {
                     <Button onClick={mintChildToken}>Mint</Button>
                 </DialogActions>
             </Dialog>
+            <span>     </span>
 
             <TransferButton variant="contained" onClick={handleClickOpen} value="transfer">Transfer Child</TransferButton>
             <Dialog open={transferChild} onClose={handleClose}>
@@ -523,6 +525,7 @@ function App() {
                     <Button onClick={transferChildToParent}>Transfer</Button>
                 </DialogActions>
             </Dialog>
+            <span>     </span>
 
             <MintButton variant="contained" onClick={handleClickOpen} value="child998">Mint Child 998</MintButton>
             <Dialog open={mintChild998Open} onClose={handleClose}>
@@ -566,6 +569,7 @@ function App() {
                     <Button onClick={handleClose} value="child998">Cancel</Button>
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
+                <span>     </span>
             </Dialog>
         </div>  
     ); 
