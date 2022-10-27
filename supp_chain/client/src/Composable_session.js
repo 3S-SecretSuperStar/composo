@@ -215,7 +215,7 @@ export async function remove_parent_ipfs(parentAcc, parentTokenID, childAcc, chi
 
 
 // update child ipfs link to remove parent token 2
-// update child ipfs link to include parent token 2
+// update child ipfs link to include parent token 2, and save owner address as owner address of parent token 2
 export async function update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID) {
     console.log("updating child token's ipfs data...");
     var metadata = await get_token_metadata(childAcc, childTokenID);
@@ -229,6 +229,7 @@ export async function update_child_ipfs_transfer(parentAcc, parentTokenID, paren
 
     // update metadata to include parent token 2
     metadata["properties"]["parent_tokens"].push({"contract_address": parentAcc2, "token_id": parentTokenID2});
+    metadata["owner_address"] = parentAcc2;
 
     console.log ("generating updated child token's ipfs...");
     var url = await updateNFT(metadata);
