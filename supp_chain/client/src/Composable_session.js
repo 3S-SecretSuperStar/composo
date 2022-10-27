@@ -355,8 +355,8 @@ export async function updateNFT(metadata) {
                 description: metadata["description"],
                 image: blob,
                 properties: {
-                    ownership_stage: metadata["ownership_stage"],
-                    recycled: metadata["recycled"],
+                    ownership_stage: metadata["properties"]["ownership_stage"],
+                    recycled: metadata["properties"]["recycled"],
                     parent_tokens: metadata["properties"]["parent_tokens"],
                     child_tokens: metadata["properties"]["child_tokens"],
                 }
