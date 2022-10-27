@@ -95,7 +95,7 @@ function App() {
                 token_id = childTokenID;
                 p_token_id = parentTokenID;
                 p_contract_addr = Composable.parentContractAddr;
-                owner_address = Composable.childContractAddr;
+                owner_address = Composable.parentContractAddr;
                 Composable.null_child();
             }
 

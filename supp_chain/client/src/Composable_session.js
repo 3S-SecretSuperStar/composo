@@ -259,12 +259,14 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
 
 export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
     
-    var index = composable[owner_addr][tokenID]["parents"].findIndex(x => x[0] === parent_addr && x[1] === parent_tokenID);
+    try {
+        var index = composable[owner_addr][tokenID]["parents"].findIndex(x => x[0] === parent_addr && x[1] === parent_tokenID);
 
-    if (index > -1) {
-        composable[owner_addr][tokenID]["parents"].splice(index, 1);
-        console.log("removed token's parents.");
-    }
+        if (index > -1) {
+            composable[owner_addr][tokenID]["parents"].splice(index, 1);
+            console.log("removed token's parents.");
+        }
+    } catch {}
     
     set_composable_session();
     console.log("Presistent structure's parents after removing parent: ", sessionStorage.getItem('composable'));
@@ -288,12 +290,16 @@ export function add_children_mapping(owner_addr, tokenID, child_addr, child_toke
 
 export function remove_children_mapping(owner_addr, tokenID, child_addr, child_tokenID) {
     
+    try {
     var index = composable[owner_addr][tokenID]["children"].indexOf([child_addr, child_tokenID]);
 
     if (index > -1) {
         composable[owner_addr][tokenID]["children"].splice(index, 1);
         console.log("removed token's children.");
     }
+
+    } catch {}
+
 
 
     set_composable_session();
