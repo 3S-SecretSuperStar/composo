@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import ReactFlow, { ReactFlowProvider, useReactFlow, Controls, Background, MiniMap } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { nodes, edges, get_composable_structure } from './Composable_session.js'
+import { nodes, edges } from './Composable_session.js'
 import CustomNode from './CustomNode';
 import './nodeStyles.css';
   

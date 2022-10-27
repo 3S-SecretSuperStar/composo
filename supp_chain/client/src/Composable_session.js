@@ -163,7 +163,7 @@ export function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
     console.log("generated/updated token's ipfs.");
 
-    set_composable_session()
+    set_composable_session();
 
     
 }
@@ -252,20 +252,22 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
 
     console.log("updated token's parents.");
 
-    set_composable_session()
+    set_composable_session();
 
     
 }
 
 export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
-    try {
-        composable[owner_addr][tokenID]["parents"].splice([parent_addr, parent_tokenID], 1);
-    }
-    catch {
-        console.error("error removing parent mapping.");
-    }
+    
+    var index = composable[owner_addr][tokenID]["parents"].findIndex(x => x[0] === parent_addr && x[1] === parent_tokenID);
 
-    set_composable_session()
+    if (index > -1) {
+        composable[owner_addr][tokenID]["parents"].splice(index, 1);
+        console.log("removed token's parents.");
+    }
+    
+    set_composable_session();
+    console.log("Presistent structure's parents after removing parent: ", sessionStorage.getItem('composable'));
 
     
 }
@@ -279,22 +281,23 @@ export function add_children_mapping(owner_addr, tokenID, child_addr, child_toke
 
     console.log("updated token's children.");
 
-    set_composable_session()
+    set_composable_session();
 
     
 }
 
 export function remove_children_mapping(owner_addr, tokenID, child_addr, child_tokenID) {
-    try {
-        var index = composable[owner_addr][tokenID]["children"].indexOf([child_addr, child_tokenID]);
+    
+    var index = composable[owner_addr][tokenID]["children"].indexOf([child_addr, child_tokenID]);
+
+    if (index > -1) {
         composable[owner_addr][tokenID]["children"].splice(index, 1);
         console.log("removed token's children.");
     }
-    catch {
-        console.error("error removing child mapping.");
-    }
 
-    set_composable_session()
+
+    set_composable_session();
+    console.log("Presistent structure's children after removing children: ", sessionStorage.getItem('composable'));
     
 }
 
@@ -319,7 +322,7 @@ export async function update_parent(parentAcc, parentTokenID, childAcc, childTok
         remove_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID);
     }
 
-    set_composable_session()
+    set_composable_session();
 
     return true;
 }
@@ -333,7 +336,7 @@ export async function update_transferred_child(parentAcc, parentTokenID, parentA
     remove_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
     add_parent_mapping(childAcc, childTokenID, parentAcc2, parentTokenID2);
 
-    set_composable_session()
+    set_composable_session();
 
     return true;
 }
