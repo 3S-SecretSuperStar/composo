@@ -414,6 +414,7 @@ export var edges = [];
 
 
 export async function getNodes() {
+    nodes = [];
     var node = {};
     var composable = get_composable_session();
    console.log("composable Session: ", composable)
@@ -447,6 +448,7 @@ export async function getNodes() {
 
 // get children of each tokenID from composable and add to edges
 export function getEdges() {
+    edges = [];
     var edge = {};
     var composable = get_composable_session();
     for (var contract_address in composable) {
