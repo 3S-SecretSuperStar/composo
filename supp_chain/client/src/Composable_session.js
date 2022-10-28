@@ -292,12 +292,12 @@ export function add_children_mapping(owner_addr, tokenID, child_addr, child_toke
 export function remove_children_mapping(owner_addr, tokenID, child_addr, child_tokenID) {
     
     try {
-    var index = composable[owner_addr][tokenID]["children"].indexOf([child_addr, child_tokenID]);
+        var index = composable[owner_addr][tokenID]["children"].findIndex(x => x[0] === child_addr && x[1] === child_tokenID);
 
-    if (index > -1) {
-        composable[owner_addr][tokenID]["children"].splice(index, 1);
-        console.log("removed token's children.");
-    }
+        if (index > -1) {
+            composable[owner_addr][tokenID]["children"].splice(index, 1);
+            console.log("removed token's children.");
+        }
 
     } catch {}
 
@@ -440,8 +440,12 @@ export async function getNodes() {
             node = {};
             node.id = tokenID;
             node.type = "custom";
+            
+            // node.position should have parent's at the top, and children below
             node.position = { x: 25+(j*250), y: 25+(i*175) };
-            node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  owner_address: metadata.owner_address, recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage};
+
+
+            node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  owner_address: metadata.owner_address, recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage, position: node.position};
             nodes.push(node);
             j++;
         }
