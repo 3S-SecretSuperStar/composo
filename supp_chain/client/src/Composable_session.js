@@ -472,7 +472,7 @@ export async function getNodes() {
 
             if (!pos_set) {
                 console.log("pos not set for: ", tokenID);
-                node.position = {x: 25 + (275 * down_push) + (300 * right_push), y: 25};
+                node.position = {x: 25 + (275 * right_push) + (300 * down_push), y: 25};
             }
 
             var metadata = await get_token_metadata(contractAddress, tokenID);
