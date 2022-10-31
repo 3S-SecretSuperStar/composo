@@ -100,7 +100,6 @@ export function set_composable_session() {
 
     // else merge the new composable with the old one, but if a token is already in the old composable, update it with the new one and don't add it again
     else {
-        console.log("Enters else in set composable");
         var old_composable = JSON.parse(sessionStorage.getItem('composable'));
         var new_composable = composable;
 
@@ -267,21 +266,14 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
 export async function replace_owner(owner_addr, new_owner_addr, tokenID){
     if(!composable[new_owner_addr]) composable[new_owner_addr] = {};
     if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID];
-    
-    // composable.pop(x);
-    let x = JSON.parse(sessionStorage.getItem('composable'));
-    console.log("Session storage item: ", x);
-    console.log("owner address: ", x[owner_addr]);
+
 
     console.log("updating token owner....");
     var metadata = await get_token_metadata(owner_addr, tokenID);
     delete composable[owner_addr][tokenID];
-    console.log("METADATA: ", metadata);
 
     metadata["owner_address"] = new_owner_addr;
-    console.log("metadata owner address: ", metadata["owner_address"]);
     
-
     console.log ("generating updated  token's ipfs...");
     var url = await updateNFT(metadata);
     console.log ("updated owner ipfs", url);
@@ -289,7 +281,6 @@ export async function replace_owner(owner_addr, new_owner_addr, tokenID){
     update_ipfs(new_owner_addr, tokenID, url);
 
     return true;
-    // set_composable_session();
 
 }
 
@@ -474,7 +465,7 @@ export async function getNodes() {
             node = {};
 
             if (composable[contractAddress][tokenID]["children"] !== undefined) {
-                if (composable[contractAddress][tokenID]["children"].length > 0) {
+                if (composable[contractAddress][tokenID]["children"].length >= 0) {
                     node.position = {x: 25 + (275 * right_push) + (275 * down_push), y: 25};
                     console.log("parent pos set for: ", tokenID);
                     pos_set = true;

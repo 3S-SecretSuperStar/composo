@@ -290,6 +290,7 @@ function App() {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
+            console.log("Composable sessionz: ", Composable.get_composable_session());
             Composable.updateFlow();
         }
 
