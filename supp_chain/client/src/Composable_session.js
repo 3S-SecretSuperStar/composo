@@ -158,19 +158,14 @@ export function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
     // using nft.storage ipfs subdomain since we're using it's API for faster data retreival
     if (!composable[owner_addr]) composable[owner_addr] = {};
-    console.log("Composable owner addr: ", composable[owner_addr]);
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
-    console.log("Composable owner addr and token ID: ", composable[owner_addr][tokenID]);
     if (!composable[owner_addr][tokenID]["metadata"]) composable[owner_addr][tokenID]["metadata"] = {};
-    console.log("Composable owner addr and token ID and metadata: ", composable[owner_addr][tokenID]["metadata"]);
+
     composable[owner_addr][tokenID]["metadata"] = ipfs_link;
-    console.log("Composable owner addr and token ID and metadata after updating: ", composable[owner_addr][tokenID]["metadata"]);
 
     console.log("generated/updated token's ipfs.");
 
-    set_composable_session();
-
-    
+    set_composable_session();    
 }
 
 
@@ -263,6 +258,16 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
     
 }
 
+export function delete_contract_token_mapping(owner_addr, tokenID) {
+    // delete contract-token mapping from sessionStorage
+
+    var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+    delete old_composable[owner_addr][tokenID];
+    sessionStorage.setItem('composable', JSON.stringify(old_composable));
+
+    
+}
+
 export async function replace_owner(owner_addr, new_owner_addr, tokenID){
     if(!composable[new_owner_addr]) composable[new_owner_addr] = {};
     if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID];
@@ -278,7 +283,12 @@ export async function replace_owner(owner_addr, new_owner_addr, tokenID){
     var url = await updateNFT(metadata);
     console.log ("updated owner ipfs", url);
 
+    // delete composable[owner_addr][tokenID] from session storage
+    delete_contract_token_mapping(owner_addr, tokenID);
+
     update_ipfs(new_owner_addr, tokenID, url);
+
+    console.log("SESH AFTER REPLACING OWNER: ", get_composable_session());
 
     return true;
 
@@ -330,7 +340,7 @@ export function remove_children_mapping(owner_addr, tokenID, child_addr, child_t
 
 
     set_composable_session();
-    console.log("Presistent structure's children after removing children: ", sessionStorage.getItem('composable'));
+    //console.log("Presistent structure's children after removing children: ", sessionStorage.getItem('composable'));
     
 }
 

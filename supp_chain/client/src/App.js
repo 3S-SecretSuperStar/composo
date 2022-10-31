@@ -251,6 +251,7 @@ function App() {
     const transferChildToParent = async () => {
         console.log("Transferring 998/1155-child token from parentTokenID to parentTokenID2 in the 988 contract...");
         setTransferChild(false);
+        console.log("Composable sessionz before transfer of child: ", Composable.get_composable_session());
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
         let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
@@ -262,14 +263,17 @@ function App() {
         console.log("childAcc in transfer: ", childAcc);
        
         var res1 = await Composable.update_parent(parentAcc, parentTokenID, childAcc, childTokenID, 0);
+        console.log("Composable sessionz after updating parent1: ", Composable.get_composable_session());
 
         Composable.parent2_to_update();
         // *** should get from user input for batch transfer ***
         Composable.setNumTokens(1);
         var res2 = await Composable.update_parent(parentAcc2, parentTokenID2, childAcc, childTokenID, 1);
+        console.log("Composable sessionz after updating parent2: ", Composable.get_composable_session());
 
         if (res1 && res2) {
             var res3 = await Composable.update_transferred_child(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID);
+            console.log("Composable sessionz after updating child: ", Composable.get_composable_session());
         }
 
         if (res3) {
