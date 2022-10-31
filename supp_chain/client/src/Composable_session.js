@@ -100,6 +100,7 @@ export function set_composable_session() {
 
     // else merge the new composable with the old one, but if a token is already in the old composable, update it with the new one and don't add it again
     else {
+        console.log("Enters else in set composable");
         var old_composable = JSON.parse(sessionStorage.getItem('composable'));
         var new_composable = composable;
 
@@ -111,6 +112,7 @@ export function set_composable_session() {
                     }
                     else {
                         old_composable[owner_addr][tokenID] = new_composable[owner_addr][tokenID];
+                        // continue;
                     }
                 }
             }
@@ -157,9 +159,13 @@ export function update_ipfs(owner_addr, tokenID, ipfs_link) {
 
     // using nft.storage ipfs subdomain since we're using it's API for faster data retreival
     if (!composable[owner_addr]) composable[owner_addr] = {};
+    console.log("Composable owner addr: ", composable[owner_addr]);
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
+    console.log("Composable owner addr and token ID: ", composable[owner_addr][tokenID]);
     if (!composable[owner_addr][tokenID]["metadata"]) composable[owner_addr][tokenID]["metadata"] = {};
+    console.log("Composable owner addr and token ID and metadata: ", composable[owner_addr][tokenID]["metadata"]);
     composable[owner_addr][tokenID]["metadata"] = ipfs_link;
+    console.log("Composable owner addr and token ID and metadata after updating: ", composable[owner_addr][tokenID]["metadata"]);
 
     console.log("generated/updated token's ipfs.");
 
@@ -259,25 +265,31 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
 }
 
 export async function replace_owner(owner_addr, new_owner_addr, tokenID){
-    if(!composable[new_owner_addr]) composable[new_owner_addr] = {}
-    if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID]
-    delete composable[owner_addr][tokenID]
+    if(!composable[new_owner_addr]) composable[new_owner_addr] = {};
+    if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID];
+    
     // composable.pop(x);
+    let x = JSON.parse(sessionStorage.getItem('composable'));
+    console.log("Session storage item: ", x);
+    console.log("owner address: ", x[owner_addr]);
 
     console.log("updating token owner....");
-    var metadata = get_token_metadata(new_owner_addr, tokenID);
+    var metadata = await get_token_metadata(owner_addr, tokenID);
+    delete composable[owner_addr][tokenID];
+    console.log("METADATA: ", metadata);
 
-    metadata['owner_address'] = new_owner_addr;
+    metadata["owner_address"] = new_owner_addr;
+    console.log("metadata owner address: ", metadata["owner_address"]);
     
 
     console.log ("generating updated  token's ipfs...");
     var url = await updateNFT(metadata);
-    console.log ("updated parent ipfs.");
+    console.log ("updated owner ipfs", url);
 
-    update_ipfs(owner_addr, tokenID, url);
+    update_ipfs(new_owner_addr, tokenID, url);
 
-
-    set_composable_session();
+    return true;
+    // set_composable_session();
 
 }
 
@@ -499,6 +511,7 @@ export async function getNodes() {
             }
 
             var metadata = await get_token_metadata(contractAddress, tokenID);
+            console.log("Nodes metadata: ", metadata);
             var link = get_ipfs_link(contractAddress, tokenID);
 
             node.id = tokenID;

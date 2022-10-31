@@ -335,13 +335,14 @@ function App() {
     const transferParent = async () => {
         console.log("Transferring Parent 998 token to another account")
         setTransferParentOpen(false);
+        var owner_addr = await erc998Minter.methods.ownerOf(tokenID).call()
         let res = await erc998Minter.methods.safeTransferFrom(accounts[0], accTransferTo, tokenID, web3.utils.encodePacked(tokenID)).send({ from: accounts[0] });
         console.log(res);
-        var owner_addr = await erc998Minter.methods.ownerOf(tokenID).call()
+        
         console.log(owner_addr)
-        Composable.replace_owner(owner_addr, accTransferTo, tokenID);
+        let x = await Composable.replace_owner(owner_addr, accTransferTo, tokenID);
 
-        if (res) {
+        if (x) {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
