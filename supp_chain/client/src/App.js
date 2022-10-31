@@ -44,6 +44,9 @@ function App() {
     const [mintChildOpen, setMintChildOpen] = useState(false);
     const [mintChild998Open, setMintChild998Open] = useState(false);
     const [transferChild, setTransferChild] = useState(false);
+    const [transferParentOpen, setTransferParentOpen] = useState(false);
+    const [accTransferFrom, setAccTransferFrom] = useState("");
+    const [accTransferTo, setAccTransferTo] = useState("");
     const [tokenName, setTokenName] = useState("");
     const [tokenSuppDeets, setTokenSuppDeets] = useState({
         stage: SUPP_DRIVERS.RAW_MATERIALS,
@@ -292,10 +295,62 @@ function App() {
         let t = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         console.log(t);
 
-        let o = await erc998Minter.methods.childBalance(parentTokenID, ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address, childTokenID).call();
-        console.log("child balance is:", o);
+        // let o = await erc998Minter.methods.childBalance(parentTokenID, ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address, childTokenID).call();
+        // console.log("child balance is:", o);
+
+        var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
+        var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
+
+        Composable.setParentContractAddr(parentAcc);
+        Composable.setChildContractAddr(childAcc);
+
+        // to save num of child tokens in parents' metadata instead of in child token metadata
+        Composable.setNumTokens(0);
+        Composable.child_to_update();
+        console.log("Generating and uploading child token metadata...");
+        var url = await uploadNFT();
+        Composable.setNumTokens(1);
+
+        // save ipfs link of child w parent addr + token mapping
+        Composable.update_ipfs(childAcc, childTokenID, url);
+        Composable.add_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
+    
+        // update parent token metadata
+        var res = await Composable.update_parent(parentAcc, parentTokenID, childAcc, childTokenID, Composable.numTokens);
+
+        if (res) {
+            setNullState();
+            console.log("IPFS mappings updated!");
+            console.log("Composable structure: ", Composable.get_composable_structure());
+            Composable.updateFlow();
+        }
+
+        else {
+            console.error("Error updating mapping.");
+        }
 
         
+    }
+
+    const transferParent = async () => {
+        console.log("Transferring Parent 998 token to another account")
+        setTransferParentOpen(false);
+        let res = await erc998Minter.methods.safeTransferFrom(accounts[0], accTransferTo, tokenID, web3.utils.encodePacked(tokenID)).send({ from: accounts[0] });
+        console.log(res);
+        var owner_addr = await erc998Minter.methods.ownerOf(tokenID).call()
+        console.log(owner_addr)
+        Composable.replace_owner(owner_addr, accTransferTo, tokenID);
+
+        if (res) {
+            setNullState();
+            console.log("IPFS mappings updated!");
+            console.log("Composable structure: ", Composable.get_composable_structure());
+            Composable.updateFlow();
+        }
+
+        else {
+            console.error("Error updating mapping.");
+        }
     }
 
     const handleInputChange = (event) => {
@@ -340,6 +395,14 @@ function App() {
                 description : value
             }))
         }
+
+        if(name === "accTransferFrom"){
+            setAccTransferFrom(value)
+        }
+
+        if(name === "accTransferTo"){
+            setAccTransferTo(value)
+        }
     }
 
     const handleClickOpen = (event) => {
@@ -360,6 +423,10 @@ function App() {
 
         if(val === "child998"){
             setMintChild998Open(true);
+        }
+
+        if(val === "transferParent"){
+            setTransferParentOpen(true);
         }
     };
 
@@ -382,6 +449,10 @@ function App() {
 
         if(val === "child998"){
             setMintChild998Open(false);
+        }
+
+        if(val === "transferParent"){
+            setTransferParentOpen(false);
         }
     };
 
@@ -569,8 +640,42 @@ function App() {
                     <Button onClick={handleClose} value="child998">Cancel</Button>
                     <Button onClick={mintChild998}>Mint</Button>
                 </DialogActions>
-                <span>     </span>
+                
             </Dialog>
+            <span>     </span>
+
+            <TransferButton variant="contained" onClick={handleClickOpen} value="transferParent">Transfer Parent</TransferButton>
+            <Dialog open={transferParentOpen} onClose={handleClose}>
+                <DialogTitle>Mint</DialogTitle>
+                <DialogContent>
+                <DialogContentText>
+                    Please enter owner account, account to transfer to and token ID
+                </DialogContentText>
+                <TextField
+                    required
+                    label="Owner"
+                    name="accTransferFrom"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="New Owner"
+                    name="accTransferTo"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    required
+                    label="token ID"
+                    name="tokenID"
+                    onChange={handleInputChange}
+                />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} value="transferParent">Cancel</Button>
+                    <Button onClick={transferParent}>Transfer</Button>
+                </DialogActions>
+            </Dialog>
+
         </div>  
     ); 
 

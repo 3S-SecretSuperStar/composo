@@ -258,6 +258,29 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
     
 }
 
+export async function replace_owner(owner_addr, new_owner_addr, tokenID){
+    if(!composable[new_owner_addr]) composable[new_owner_addr] = {}
+    if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID]
+    delete composable[owner_addr][tokenID]
+    // composable.pop(x);
+
+    console.log("updating token owner....");
+    var metadata = get_token_metadata(new_owner_addr, tokenID);
+
+    metadata['owner_address'] = new_owner_addr;
+    
+
+    console.log ("generating updated  token's ipfs...");
+    var url = await updateNFT(metadata);
+    console.log ("updated parent ipfs.");
+
+    update_ipfs(owner_addr, tokenID, url);
+
+
+    set_composable_session();
+
+}
+
 export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
     
     try {

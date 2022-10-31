@@ -212,6 +212,13 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
     
 }
 
+// export function replace_owner(owner_addr, new_owner_addr, tokenID){
+//     if(!composable[new_owner_addr]) composable[new_owner_addr] = {}
+//     if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID]
+//     let x = composable[owner_addr][tokenID]
+//     composable.pop(x);
+// }
+
 export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
     try {
         composable[owner_addr][tokenID]["parents"].splice([parent_addr, parent_tokenID], 1);
