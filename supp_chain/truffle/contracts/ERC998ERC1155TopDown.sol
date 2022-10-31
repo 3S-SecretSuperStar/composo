@@ -28,6 +28,9 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     mapping(uint256 => EnumerableSet.AddressSet) private _childContract;
     mapping(uint256 => mapping(address => EnumerableSet.UintSet)) private _childsForChildContract;
 
+    mapping(uint256 => bool) public isERC721;
+    mapping(uint256 => bool) public isERC1155;
+
     constructor(string memory name, string memory symbol, string memory baseURI) ERC721(name, symbol) public {
         _baseURI();
     }
@@ -93,6 +96,8 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     function getOwner(uint256 tokenID) external view returns(address){
         return ownerOf(tokenID);
     }
+
+    
 
     /**
      * @dev Returns the contract address of the child token ID, given a parent and child token ID.
