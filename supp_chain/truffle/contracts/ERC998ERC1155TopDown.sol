@@ -97,7 +97,21 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         return ownerOf(tokenID);
     }
 
-    
+    function setIsERC721(uint256 tokenID) public {
+        isERC721[tokenID] = true;
+    }
+
+    function getIsERC721(uint256 tokenID) external view returns(bool) {
+        return isERC721[tokenID];
+    }
+
+    function setIsERC1155(uint256 tokenID) public {
+        isERC1155[tokenID] = true;
+    }
+
+    function getIsERC1155(uint256 tokenID) external view returns(bool) {
+        return isERC1155[tokenID];
+    }
 
     /**
      * @dev Returns the contract address of the child token ID, given a parent and child token ID.

@@ -189,6 +189,7 @@ function App() {
         setMintParentOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
             from: accounts[0] });  
+        let x = erc998Minter.methods.setIsERC721(tokenID).call();
         console.log(result);
             
         var url = await uploadNFT();
@@ -206,6 +207,7 @@ function App() {
         setMintChildOpen(false);
         let result = await erc1155Minter.methods.mint(accounts[0], childTokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
+        let x = erc998Minter.methods.setIsERC1155(tokenID).call();
         console.log(result);
 
         // child token transfer to 998 contract
@@ -253,11 +255,23 @@ function App() {
         setTransferChild(false);
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
-        console.log(result);
-            
-        var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
+        var parentAcc = await erc998Minter.methods.ownerOf(childTokenID).call();
+        console.log("owner of child 998: ", parentAcc);
         var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
+        console.log(erc998Minter.methods);
+        let x = await erc998Minter.methods.getIsERC1155(childTokenID).call();
+        console.log(x);
+        if(x){
+            let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
+            console.log(result);
+        } else {
+            let t = await erc998Minter.methods.safeTransferFrom(parentAcc, accounts[0], childTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: parentAcc });
+            console.log(t);
+        }
+        
+            
+        
+        
         var childAcc = await erc998Minter.methods.getChildContract(parentTokenID2, childTokenID).call();
         console.log("childAcc in transfer: ", childAcc);
        
@@ -292,8 +306,13 @@ function App() {
             from: accounts[0] });
         console.log(result);
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+        console.log("child 998 owner addr before transfer: ", accounts[0]);
+
+        let c = await erc998Minter.methods.setApprovalForAll(addr_to, true).send({ from: accounts[0] });
+        console.log("set approval call: ", c)
         let t = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         console.log(t);
+        console.log("child 998 owner addr after transfer: ", addr_to);
 
         // let o = await erc998Minter.methods.childBalance(parentTokenID, ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address, childTokenID).call();
         // console.log("child balance is:", o);
