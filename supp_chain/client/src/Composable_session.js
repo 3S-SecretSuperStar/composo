@@ -474,7 +474,7 @@ export async function getNodes() {
             node = {};
 
             if (composable[contractAddress][tokenID]["children"] !== undefined) {
-                if (composable[contractAddress][tokenID]["children"].length >= 0) {
+                if (composable[contractAddress][tokenID]["children"].length > 0) {
                     node.position = {x: 25 + (275 * right_push) + (275 * down_push), y: 25};
                     console.log("parent pos set for: ", tokenID);
                     pos_set = true;
