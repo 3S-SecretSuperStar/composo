@@ -86,9 +86,21 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         _removeChild(fromTokenId, childContract, childTokenId, amount);
 
         // TODO: maybe check if to == this
-        ERC1155(childContract).safeTransferFrom(address(this), to, childTokenId, amount, data);
-        emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
+        if(isERC1155[childTokenId]){
+            ERC1155(childContract).safeTransferFrom(address(this), to, childTokenId, amount, data);
+            emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
+        } else {
+            ERC721(childContract).safeTransferFrom(address(this), to, childTokenId, data);
+            emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
+        }
+        
+       
+        
+        
     }
+
+    
+
 
     /**
      * @dev Returns the owner of the token specified by tokenId. Wrapper function for ERC721 function ownerOf(). 
@@ -97,6 +109,20 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         return ownerOf(tokenID);
     }
 
+
+    /**
+     * @dev Sets isERC1155 array 
+    */
+    function setIsERC1155(uint256 tokenID) public {
+        isERC1155[tokenID] = true;
+    }
+
+    /**
+     * @dev gets true if tokenID is ERC1155
+    */
+    function getIsERC1155(uint256 tokenID) external view returns(bool) {
+        return isERC1155[tokenID];
+    }
     
 
     /**

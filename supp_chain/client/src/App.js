@@ -206,7 +206,9 @@ function App() {
         setMintChildOpen(false);
         let result = await erc1155Minter.methods.mint(accounts[0], childTokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
-        console.log(result);
+        let x = await erc998Minter.methods.setIsERC1155(childTokenID).send({ from: accounts[0] });
+        let y = await erc998Minter.methods.getIsERC1155(childTokenID).call();
+        console.log(y);
 
         // child token transfer to 998 contract
         console.log("Transferring 1155-child token to 998 contract...");
@@ -254,8 +256,14 @@ function App() {
         console.log("Composable sessionz before transfer of child: ", Composable.get_composable_session());
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
-        console.log(result);
+        let x = await erc998Minter.methods.getIsERC1155(childTokenID).call();
+        if(x){
+            let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
+        } else {
+            let r = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, addr_to, addr_to, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
+        }
+        
+        // console.log(result);
             
         var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
         var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
