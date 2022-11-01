@@ -271,62 +271,92 @@ function App() {
         
     }
 
-    const transferChildToParent = async () => {
-        console.log("Transferring 998/1155-child token from parentTokenID to parentTokenID2 in the 988 contract...");
-        setTransferChild(false);
-        console.log("Composable sessionz before transfer of child: ", Composable.get_composable_session());
-
-
-        let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
-        let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
-        var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
-        var c_owner = await erc998Minter.methods.ownerOf(childTokenID).call();
+    async function getRoot(id, t){
+        // let x = await erc998Minter.methods.getIsERC1155(id).call();
+        // if(x === true || id === t) return id;
+        if(id === t){
+            return true;
+        }
 
         let childCon1 = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
         let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
+
+        let childs998 = await erc998Minter.methods.childIdsOwned(id, childCon1).call();
+       
+        let childs1155 = await erc998Minter.methods.childIdsOwned(id, childCon2).call();
+        
+        let allChilds = [];
+        
+        allChilds = childs998.concat(childs1155);
+
+        for(var i = 0; i < allChilds.length; i++){
+            let x = await erc998Minter.methods.getIsERC1155(allChilds[i]).call();
+            if(!x){
+                return getRoot(allChilds[i], t);
+            } else {
+                if(allChilds[i] === t){
+                    return true;
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        return false;
+
+
+
+    }
+
+    const transferChildToParent = async () => {
+    
+        console.log("Transferring 998/1155-child token from parentTokenID to parentTokenID2 in the 988 contract...");
+        setTransferChild(false);
+        console.log("Composable sessionz before transfer of child: ", Composable.get_composable_session());
+        
+
+        let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
+        let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+        // var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
+        // var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
+       
+
+        // let childCon1 = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+        // let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
 
         let y = await erc998Minter.methods.getRootOwners().call();
         console.log(y);
         var root = 0;
         for(var i = 0; i < y.length; i++){
-            let p = await erc998Minter.methods.childIdsOwned(y[i], childCon1).call();
-            console.log("p is: ", p);
-            let q = await erc998Minter.methods.childIdsOwned(y[i], childCon2).call();
-            console.log("q is: ", q)
-            let m = [];
-            console.log("m before concat: ", m)
-            m = p.concat(q);
-            // m.push(n)
-            console.log("m after concat: ", m)
-            // m = m.concat(q);
-            console.log("child Ids for: " + y[i] + "is :" + m);
-            let b = parentTokenID.toString();
-            let index = m.findIndex(b);
-            console.log("Index is :", index);
-            if(index > -1){
-                console.log("YEET");
+            let r = getRoot(y[i], childTokenID);
+            if(r){
                 root = y[i];
+                break;
+            } else {
+                continue;
             }
         }
 
         
         console.log("root is: ", root);
 
-
         let x = await erc998Minter.methods.getIsERC1155(childTokenID).call();
         if(x){
-            let result = await erc998Minter.methods.safeTransferChildFrom(root, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0] });
+            let result = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, root, addr_to, addr_from, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
         } else {
-            console.log("child token owner is:", c_owner);
-            console.log("accounts[0] is: ", accounts[0]);
-            let r = await erc998Minter.methods.safeTransferChildFrom(root, addr_to, addr_to, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0] });
+            let r = await erc998Minter.methods.safeTransferChildFrom(parentTokenID, root, addr_to, addr_to, childTokenID, 1, web3.utils.encodePacked(parentTokenID2)).send({ from: accounts[0]});
         }
         
         // console.log(result);
-            
-        
-        
+        // console.log("YEET before parentACC") ;
+        var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
+        // console.log("YEET after parentACC") ;
+        // console.log("YEET before parentACC2") ;
+        var parentAcc2 = await erc998Minter.methods.ownerOf(parentTokenID2).call();
+        // console.log("YEET after parentACC2") ;
+        // console.log("YEET before c_owner") ;
+        // var c_owner = await erc998Minter.methods.ownerOf(childTokenID).call();
+        // console.log("YEET after c_owner") ;
         var childAcc = await erc998Minter.methods.getChildContract(parentTokenID2, childTokenID).call();
         console.log("childAcc in transfer: ", childAcc);
        
@@ -355,7 +385,9 @@ function App() {
         else {
             console.error("Error updating mapping.");
         }
-
+    
+    
+   
     }
 
     const mintChild998 = async () => {

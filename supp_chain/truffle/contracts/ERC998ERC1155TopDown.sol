@@ -104,14 +104,13 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     /**
      * @dev Transfers child token from a token ID.
      */
-    function safeTransferChildFrom(uint256 fromTokenId, address to, address childContract, uint256 childTokenId, uint256 amount, bytes memory data) public override {
+    function safeTransferChildFrom(uint256 fromTokenId, uint256 root, address to, address childContract, uint256 childTokenId, uint256 amount, bytes memory data) public override {
         require(to != address(0), "ERC998: transfer to the zero address");
 
         address operator = _msgSender();
         // uint256 o = _holdersOf[childContract][childTokenId];
         require(
-            ownerOf(fromTokenId) == operator ||
-            isApprovedForAll(ownerOf(fromTokenId), operator),
+            ownerOf(root) == operator,
             "ERC998: caller is not owner nor approved"
         );
 
@@ -150,6 +149,20 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     function setIsERC1155(uint256 tokenID) public {
         isERC1155[tokenID] = true;
     }
+
+    // /**
+    //  * @dev gets true if tokenID is ERC721
+    // */
+    // function getIsERC721(uint256 tokenID) external view returns(bool) {
+    //     return isERC721[tokenID];
+    // }
+
+    // /**
+    //  * @dev Sets isERC721 array 
+    // */
+    // function setIsERC721(uint256 tokenID) public {
+    //     isERC721[tokenID] = true;
+    // }
 
     /**
      * @dev gets true if tokenID is ERC1155
@@ -273,7 +286,7 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     }
 
     function _removeChild(uint256 tokenId, address childContract, uint256 childTokenId, uint256 amount) internal virtual {
-        require(amount != 0 || _balances[tokenId][childContract][childTokenId] >= amount, "ERC998: insufficient child balance for transfer");
+        require(_balances[tokenId][childContract][childTokenId] >= amount, "ERC998: insufficient child balance for transfer");
         _balances[tokenId][childContract][childTokenId] -= amount;
         if(_balances[tokenId][childContract][childTokenId] == 0) {
             _holdersOf[childContract][childTokenId].remove(tokenId);
