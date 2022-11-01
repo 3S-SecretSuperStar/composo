@@ -32,7 +32,7 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     mapping(uint256 => bool) public isERC1155;
     
     // mapping from tokenID to IPFS hash
-    mapping(uint256 => string) public tokenURI;
+    mapping(uint256 => string) public token_URI;
 
     uint256[] public rootOwners;
 
@@ -42,12 +42,12 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
 
     // set tokenURI
     function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
-        tokenURI[tokenId] = _tokenURI;
+        token_URI[tokenId] = _tokenURI;
     }
 
     // get tokenURI
     function getTokenURI(uint256 tokenId) public view returns (string memory) {
-        return tokenURI[tokenId];
+        return token_URI[tokenId];
     }
 
 

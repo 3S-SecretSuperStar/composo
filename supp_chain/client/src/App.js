@@ -276,11 +276,11 @@ function App() {
         }
         
     }
+    //sup
 
     const transferChildToParent = async () => {
         console.log("Transferring 998/1155-child token from parentTokenID to parentTokenID2 in the 988 contract...");
         setTransferChild(false);
-        console.log("Composable sessionz before transfer of child: ", Composable.get_composable_session());
 
 
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
@@ -298,14 +298,13 @@ function App() {
         for(var i = 0; i < y.length; i++){
             let p = await erc998Minter.methods.childIdsOwned(y[i], childCon1).call();
             console.log("p is: ", p);
+            console.log("p is: ", typeof p);
             let q = await erc998Minter.methods.childIdsOwned(y[i], childCon2).call();
             console.log("q is: ", q)
-            let m = [];
-            console.log("m before concat: ", m)
-            m = p.concat(q);
-            // m.push(n)
-            console.log("m after concat: ", m)
-            // m = m.concat(q);
+            console.log("q is: ", typeof q);
+            // concat p and q
+            let m = p.concat(q);
+            console.log("m is: ", m);
             console.log("child Ids for: " + y[i] + "is :" + m);
             let b = parentTokenID.toString();
             let index = m.findIndex(b);
