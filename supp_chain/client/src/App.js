@@ -196,8 +196,7 @@ function App() {
         let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
         
         setMintParentOpen(false);
-        let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
-            from: accounts[0] });  
+        let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ from: accounts[0] });  
         console.log(result);
         let x = await erc998Minter.methods.setRootOwner(tokenID).send({ from: accounts[0] });
         let y = await erc998Minter.methods.getRootOwners().call();
@@ -213,10 +212,14 @@ function App() {
 
         Composable.update_ipfs(accounts[0], tokenID, url);
 
-        console.log("after minting...");
-        console.log("Local Structure: ", Composable.get_composable_structure());
-        // console.log("Persistent Structure: ", Composable.get_composable_session());
-        Composable.updateFlow();
+        if (result) {
+            console.log("after minting...");
+            console.log("Local Structure: ", Composable.get_composable_structure());
+            // update IPFS of 998 token on smart contract
+            console.log("Updating IPFS of 998 token on smart contract...");
+            await erc998Minter.methods.setTokenURI(tokenID, url).send({ from: accounts[0] });
+            Composable.updateFlow();            
+        }
     }
 
     const mintChildToken = async () => {
@@ -262,6 +265,9 @@ function App() {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
+            await erc998Minter.methods.setTokenURI(childTokenID, url).send({ from: accounts[0] });
+            var parent_url =  Composable.get_ipfs_link(parentAcc, parentTokenID);
+            await erc998Minter.methods.setTokenURI(parentTokenID, parent_url).send({ from: accounts[0] });
             Composable.updateFlow();
         }
 
@@ -269,6 +275,44 @@ function App() {
             console.error("Error updating mapping.");
         }
         
+    }
+    
+
+    async function getRoot(id, t){
+        // let x = await erc998Minter.methods.getIsERC1155(id).call();
+        // if(x === true || id === t) return id;
+        if(id === t){
+            return true;
+        }
+
+        let childCon1 = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
+        let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
+
+        let childs998 = await erc998Minter.methods.childIdsOwned(id, childCon1).call();
+       
+        let childs1155 = await erc998Minter.methods.childIdsOwned(id, childCon2).call();
+        
+        let allChilds = [];
+        
+        allChilds = childs998.concat(childs1155);
+
+        for(var i = 0; i < allChilds.length; i++){
+            let x = await erc998Minter.methods.getIsERC1155(allChilds[i]).call();
+            if(!x){
+                return getRoot(allChilds[i], t);
+            } else {
+                if(allChilds[i] === t){
+                    return true;
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        return false;
+
+
+
     }
 
     async function getRoot(id, t){
@@ -312,8 +356,7 @@ function App() {
     
         console.log("Transferring 998/1155-child token from parentTokenID to parentTokenID2 in the 988 contract...");
         setTransferChild(false);
-        console.log("Composable sessionz before transfer of child: ", Composable.get_composable_session());
-        
+
 
         let addr_from = ERC1155PresetMinterPauser.networks[networkId].address;
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;

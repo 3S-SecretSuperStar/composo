@@ -30,12 +30,26 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
 
     mapping(uint256 => bool) public isERC721;
     mapping(uint256 => bool) public isERC1155;
+    
+    // mapping from tokenID to IPFS hash
+    mapping(uint256 => string) public token_URI;
 
     uint256[] public rootOwners;
 
     constructor(string memory name, string memory symbol, string memory baseURI) ERC721(name, symbol) public {
         _baseURI();
     }
+
+    // set tokenURI
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
+        token_URI[tokenId] = _tokenURI;
+    }
+
+    // get tokenURI
+    function getTokenURI(uint256 tokenId) public view returns (string memory) {
+        return token_URI[tokenId];
+    }
+
 
     /**
      * @dev Gives child balance for a specific child contract and child id .
