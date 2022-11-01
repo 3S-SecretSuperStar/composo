@@ -187,18 +187,21 @@ function App() {
 
         
         setMintParentOpen(false);
-        let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ 
-            from: accounts[0] });  
+        let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ from: accounts[0] });  
         console.log(result);
             
         var url = await uploadNFT();
 
         Composable.update_ipfs(accounts[0], tokenID, url);
 
-        console.log("after minting...");
-        console.log("Local Structure: ", Composable.get_composable_structure());
-        // console.log("Persistent Structure: ", Composable.get_composable_session());
-        Composable.updateFlow();
+        if (result) {
+            console.log("after minting...");
+            console.log("Local Structure: ", Composable.get_composable_structure());
+            // update IPFS of 998 token on smart contract
+            console.log("Updating IPFS of 998 token on smart contract...");
+            await erc998Minter.methods.setTokenURI(tokenID, url).send({ from: accounts[0] });
+            Composable.updateFlow();            
+        }
     }
 
     const mintChildToken = async () => {
@@ -241,6 +244,9 @@ function App() {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
+            await erc998Minter.methods.setTokenURI(childTokenID, url).send({ from: accounts[0] });
+            var parent_url =  Composable.get_ipfs_link(parentAcc, parentTokenID);
+            await erc998Minter.methods.setTokenURI(parentTokenID, parent_url).send({ from: accounts[0] });
             Composable.updateFlow();
         }
 
