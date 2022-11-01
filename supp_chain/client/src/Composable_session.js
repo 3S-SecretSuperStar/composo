@@ -468,6 +468,7 @@ export async function getNodes() {
     
 
     var down_push = 0;
+    var max_right_push = 0;
     for (var contractAddress in composable) {
         var right_push = 0;
         for (var tokenID in composable[contractAddress]) {
@@ -477,6 +478,10 @@ export async function getNodes() {
             if (composable[contractAddress][tokenID]["children"] !== undefined) {
                 if (composable[contractAddress][tokenID]["children"].length >= 0) {
                     node.position = {x: 25 + (275 * right_push) + (275 * down_push), y: 25};
+                    if (node.position.x > max_right_push) {
+                        max_right_push = node.position.x;
+                    }
+
                     console.log("parent pos set for: ", tokenID);
                     pos_set = true;
                 }
@@ -494,6 +499,9 @@ export async function getNodes() {
                     if (parent_node !== undefined) {
                         var child_index = parent_node.data.child_tokens.findIndex(x => x["token_id"] === tokenID);
                         node.position = {x: parent_node.position.x + (225 * (child_index-1)), y: parent_node.position.y + 225};
+                        if (node.position.x > max_right_push) {
+                            max_right_push = node.position.x;
+                        }
                         console.log("child pos set for: ", tokenID);
                         pos_set = true;
                     }
@@ -508,7 +516,10 @@ export async function getNodes() {
 
             if (!pos_set) {
                 console.log("pos not set for: ", tokenID);
-                node.position = {x: 25 + (275 * right_push) + (300 * down_push), y: 25};
+                node.position = {x: 300 + max_right_push + (25 * down_push), y: 25};
+                if (node.position.x > max_right_push) {
+                    max_right_push = node.position.x;
+                }
             }
 
             var metadata = await get_token_metadata(contractAddress, tokenID);
@@ -536,6 +547,9 @@ export async function getNodes() {
 
         var child_index = parent_node.data.child_tokens.findIndex(x => x["token_id"] === tokenID);
         node.position = {x: parent_node.position.x + (225 * (child_index-1)), y: parent_node.position.y + 225};
+        if (node.position.x > max_right_push) {
+            max_right_push = node.position.x;
+        }
         console.log("child queue pos set for: ", tokenID);
 
         var metadata = await get_token_metadata(contractAddress, tokenID);
