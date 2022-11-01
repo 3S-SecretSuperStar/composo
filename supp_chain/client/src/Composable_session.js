@@ -90,7 +90,7 @@ export function get_composable_session() {
     return JSON.parse(sessionStorage.getItem('composable'));
 }
 
-export function set_composable_session() {
+export async function set_composable_session() {
     // if session storage is empty, set it to the new composable
     // else merge the new composable with the old one
 
@@ -106,21 +106,18 @@ export function set_composable_session() {
         for (var owner_addr in new_composable) {
             if (owner_addr in old_composable) {
                 for (var tokenID in new_composable[owner_addr]) {
-                    if (tokenID in old_composable[owner_addr]) {
-                        old_composable[owner_addr][tokenID] = new_composable[owner_addr][tokenID];
-                    }
-                    else {
-                        old_composable[owner_addr][tokenID] = new_composable[owner_addr][tokenID];
-                        // continue;
-                    }
+                    old_composable[owner_addr][tokenID] = new_composable[owner_addr][tokenID];
                 }
             }
             else {
                 old_composable[owner_addr] = new_composable[owner_addr];
             }
         }
+        
         sessionStorage.setItem('composable', JSON.stringify(old_composable));
     }
+
+    return true;
     
 }
 
@@ -160,6 +157,17 @@ export function update_ipfs(owner_addr, tokenID, ipfs_link) {
     if (!composable[owner_addr]) composable[owner_addr] = {};
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
     if (!composable[owner_addr][tokenID]["metadata"]) composable[owner_addr][tokenID]["metadata"] = {};
+
+    // save sessionStorage[owner_addr][tokenID] data in local composable if it is not null
+    if (sessionStorage.getItem('composable') != null) {
+        var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+        if (owner_addr in old_composable) {
+            if (tokenID in old_composable[owner_addr]) {
+                composable[owner_addr][tokenID] = old_composable[owner_addr][tokenID];
+            }
+        }
+    }
+
 
     composable[owner_addr][tokenID]["metadata"] = ipfs_link;
 
@@ -246,9 +254,23 @@ export async function update_child_ipfs_transfer(parentAcc, parentTokenID, paren
 
 // update parents of a token
 export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
+
+    // save sessionStorage[owner_addr][tokenID] data in local composable if it is not null
+    if (sessionStorage.getItem('composable') != null) {
+        var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+        if (owner_addr in old_composable) {
+            if (tokenID in old_composable[owner_addr]) {
+                console.log("SESH DEETS: ", old_composable[owner_addr][tokenID]);
+                composable[owner_addr][tokenID] = old_composable[owner_addr][tokenID];
+            }
+        }
+    }
+
     if (!composable[owner_addr]) composable[owner_addr] = {};
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
     if (!composable[owner_addr][tokenID]["parents"]) composable[owner_addr][tokenID]["parents"] = [];
+
+    
     composable[owner_addr][tokenID]["parents"].push([parent_addr, parent_tokenID]);
 
     console.log("updated token's parents.");
@@ -270,7 +292,16 @@ export function delete_contract_token_mapping(owner_addr, tokenID) {
 
 export async function replace_owner(owner_addr, new_owner_addr, tokenID){
     if(!composable[new_owner_addr]) composable[new_owner_addr] = {};
-    if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID];
+    if(!composable[new_owner_addr][tokenID]) 
+
+    if (sessionStorage.getItem('composable') != null) {
+        var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+        if (old_composable[owner_addr] != null && old_composable[owner_addr][tokenID] != null) {
+            composable[new_owner_addr][tokenID] = old_composable[owner_addr][tokenID];
+        }
+    }
+    
+    composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID];
 
 
     console.log("updating token owner....");
@@ -295,6 +326,16 @@ export async function replace_owner(owner_addr, new_owner_addr, tokenID){
 }
 
 export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_tokenID) {
+
+    // save sessionStorage[owner_addr][tokenID] data in local composable if it is not null
+    if (sessionStorage.getItem('composable') != null) {
+        var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+        if (owner_addr in old_composable) {
+            if (tokenID in old_composable[owner_addr]) {
+                composable[owner_addr][tokenID] = old_composable[owner_addr][tokenID];
+            }
+        }
+    }
     
     try {
         var index = composable[owner_addr][tokenID]["parents"].findIndex(x => x[0] === parent_addr && x[1] === parent_tokenID);
@@ -313,9 +354,21 @@ export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_t
 
 // update children of a token
 export function add_children_mapping(owner_addr, tokenID, child_addr, child_tokenID, child_tokens) {
+
+    // save sessionStorage[owner_addr][tokenID] data in local composable if it is not null
+    if (sessionStorage.getItem('composable') != null) {
+        var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+        if (owner_addr in old_composable) {
+            if (tokenID in old_composable[owner_addr]) {
+                composable[owner_addr][tokenID] = old_composable[owner_addr][tokenID];
+            }
+        }
+    }
+
     if (!composable[owner_addr]) composable[owner_addr] = {};
     if (!composable[owner_addr][tokenID]) composable[owner_addr][tokenID] = {};
     if (!composable[owner_addr][tokenID]["children"]) composable[owner_addr][tokenID]["children"] = [];
+    
     composable[owner_addr][tokenID]["children"].push([child_addr, child_tokenID, child_tokens]);
 
     console.log("updated token's children.");
@@ -326,6 +379,16 @@ export function add_children_mapping(owner_addr, tokenID, child_addr, child_toke
 }
 
 export function remove_children_mapping(owner_addr, tokenID, child_addr, child_tokenID) {
+
+    // save sessionStorage[owner_addr][tokenID] data in local composable if it is not null
+    if (sessionStorage.getItem('composable') != null) {
+        var old_composable = JSON.parse(sessionStorage.getItem('composable'));
+        if (owner_addr in old_composable) {
+            if (tokenID in old_composable[owner_addr]) {
+                composable[owner_addr][tokenID] = old_composable[owner_addr][tokenID];
+            }
+        }
+    }
     
     try {
         var index = composable[owner_addr][tokenID]["children"].findIndex(x => x[0] === child_addr && x[1] === child_tokenID);
@@ -365,7 +428,7 @@ export async function update_parent(parentAcc, parentTokenID, childAcc, childTok
         remove_children_mapping(parentAcc, parentTokenID, childAcc, childTokenID);
     }
 
-    set_composable_session();
+   
 
     return true;
 }
@@ -378,8 +441,6 @@ export async function update_transferred_child(parentAcc, parentTokenID, parentA
     await update_child_ipfs_transfer(parentAcc, parentTokenID, parentAcc2, parentTokenID2, childAcc, childTokenID);
     remove_parent_mapping(childAcc, childTokenID, parentAcc, parentTokenID);
     add_parent_mapping(childAcc, childTokenID, parentAcc2, parentTokenID2);
-
-    set_composable_session();
 
     return true;
 }
@@ -516,8 +577,8 @@ export async function getNodes() {
 
             if (!pos_set) {
                 console.log("pos not set for: ", tokenID);
-                node.position = {x: 300 + max_right_push + (25 * down_push), y: 25};
-                if (node.position.x > max_right_push) {
+                node.position = {x: 300 + max_right_push + (150 * right_push) + (25 * down_push) , y: 25};
+                if (node.position.x >= max_right_push) {
                     max_right_push = node.position.x;
                 }
             }
