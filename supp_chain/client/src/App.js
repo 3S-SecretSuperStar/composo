@@ -322,6 +322,8 @@ function App() {
             return true;
         }
 
+        console.log("id is: ", id);
+
         let childCon1 = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
         let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
 
@@ -332,13 +334,21 @@ function App() {
         let allChilds = [];
         
         allChilds = childs998.concat(childs1155);
+        console.log("all children: ", allChilds);
 
         for(var i = 0; i < allChilds.length; i++){
             let x = await erc998Minter.methods.getIsERC1155(allChilds[i]).call();
             if(!x){
-                return getRoot(allChilds[i], t);
+                let y = await getRoot(allChilds[i], t);
+                if(y){
+                    return true;
+                } else {
+                    continue;
+                }
             } else {
+                console.log("Enters else in getRoot");
                 if(allChilds[i] === t){
+                    console.log("Enters true condition");
                     return true;
                 } else {
                     continue;
@@ -368,10 +378,12 @@ function App() {
         // let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
 
         let y = await erc998Minter.methods.getRootOwners().call();
-        console.log(y);
+        console.log("root owners are ", y);
         var root = 0;
         for(var i = 0; i < y.length; i++){
-            let r = getRoot(y[i], childTokenID);
+            // console.log(" i is: ", y[i]);
+            let r = await getRoot(y[i], childTokenID);
+            // console.log("r is :", r);
             if(r){
                 root = y[i];
                 break;
