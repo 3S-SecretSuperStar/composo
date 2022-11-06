@@ -191,22 +191,13 @@ function App() {
     const mintToken = async () => {
         console.log("Minting 998-parent token...");
         console.log("Local Structure: ", Composable.get_composable_structure());
-        // console.log("Persistent Structure: ", Composable.get_composable_session());
-        let childCon1 = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
+       
         
         setMintParentOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ from: accounts[0] });  
         console.log(result);
         let x = await erc998Minter.methods.setRootOwner(tokenID).send({ from: accounts[0] });
-        let y = await erc998Minter.methods.getRootOwners().call();
-        console.log(y);
-
-        let p = await erc998Minter.methods.childIdsOwned(1, childCon1).call();
-        let q = await erc998Minter.methods.childIdsOwned(1, childCon2).call();
-        let m = p.concat(q);
         
-        console.log("Owned children: ", m);
             
         var url = await uploadNFT();
 
@@ -217,7 +208,7 @@ function App() {
             console.log("Local Structure: ", Composable.get_composable_structure());
             // update IPFS of 998 token on smart contract
             console.log("Updating IPFS of 998 token on smart contract...");
-            await erc998Minter.methods.setTokenURI(tokenID, url).send({ from: accounts[0] });
+            // await erc998Minter.methods.setTokenURI(tokenID, url).send({ from: accounts[0] });
             Composable.updateFlow();            
         }
     }
@@ -229,8 +220,7 @@ function App() {
         let result = await erc1155Minter.methods.mint(accounts[0], childTokenID, numChildTokens, "0x").send({ 
             from: accounts[0] });
         let x = await erc998Minter.methods.setIsERC1155(childTokenID).send({ from: accounts[0] });
-        let y = await erc998Minter.methods.getIsERC1155(childTokenID).call();
-        console.log(y);
+        
 
         // child token transfer to 998 contract
         console.log("Transferring 1155-child token to 998 contract...");
@@ -238,8 +228,7 @@ function App() {
         let transfer = await erc1155Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, numChildTokens, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
         
         console.log(transfer);
-        let t = await erc998Minter.methods.childBalance(parentTokenID, childCon, childTokenID).call();
-        console.log("root owner: ", t);
+       
       
         var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
         var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
@@ -265,9 +254,9 @@ function App() {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
-            await erc998Minter.methods.setTokenURI(childTokenID, url).send({ from: accounts[0] });
+            // await erc998Minter.methods.setTokenURI(childTokenID, url).send({ from: accounts[0] });
             var parent_url =  Composable.get_ipfs_link(parentAcc, parentTokenID);
-            await erc998Minter.methods.setTokenURI(parentTokenID, parent_url).send({ from: accounts[0] });
+            // await erc998Minter.methods.setTokenURI(parentTokenID, parent_url).send({ from: accounts[0] });
             Composable.updateFlow();
         }
 
@@ -277,43 +266,6 @@ function App() {
         
     }
     
-
-    async function getRoot(id, t){
-        // let x = await erc998Minter.methods.getIsERC1155(id).call();
-        // if(x === true || id === t) return id;
-        if(id === t){
-            return true;
-        }
-
-        let childCon1 = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        let childCon2 = ERC1155PresetMinterPauser.networks[networkId].address;
-
-        let childs998 = await erc998Minter.methods.childIdsOwned(id, childCon1).call();
-       
-        let childs1155 = await erc998Minter.methods.childIdsOwned(id, childCon2).call();
-        
-        let allChilds = [];
-        
-        allChilds = childs998.concat(childs1155);
-
-        for(var i = 0; i < allChilds.length; i++){
-            let x = await erc998Minter.methods.getIsERC1155(allChilds[i]).call();
-            if(!x){
-                return getRoot(allChilds[i], t);
-            } else {
-                if(allChilds[i] === t){
-                    return true;
-                } else {
-                    continue;
-                }
-            }
-        }
-
-        return false;
-
-
-
-    }
 
     async function getRoot(id, t){
         // let x = await erc998Minter.methods.getIsERC1155(id).call();
@@ -452,25 +404,15 @@ function App() {
             from: accounts[0] });
 
         // console.log(result);
-        let x = await erc998Minter.methods.ownerOf(childTokenID).call();
-        console.log("Owner of child998 is: ", x);
-        let p = await erc998Minter.methods.ownerOf(parentTokenID).call();
-        console.log("Owner of parent to transfer to: ", p);
+        
         
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
-        // let a = await erc998Minter.methods.approve(addr_to, childTokenID).send({ from: accounts[0] });
-        // console.log("Approving contract address: ", a);
+        
         let transfer = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
-        // let t = await erc998Minter.methods.add998Child(parentTokenID, addr_to, childTokenID).send({ from: accounts[0] });
-        // console.log(t);
+       
         
         
-        console.log("accounts[0] is :", accounts[0]);
-        let y = await erc998Minter.methods.getApproved(childTokenID).call();
-        console.log("check token approval :" , y);
-
-        let z = await erc998Minter.methods.isApprovedForAll(x, accounts[0]).call();
-        console.log("check owner approval: ", z);
+        
 
         // let o = await erc998Minter.methods.childBalance(parentTokenID, ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address, childTokenID).call();
         // console.log("child balance is:", o);
