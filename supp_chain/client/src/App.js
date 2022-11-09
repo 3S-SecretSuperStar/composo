@@ -153,6 +153,13 @@ function App() {
 
     }, []);
 
+    useEffect(() => {
+        if(ERC1155PresetMinterPauser.networks[networkId] !== undefined){
+            let childCon = ERC1155PresetMinterPauser.networks[networkId].address;
+            Composable.updateFlow(accounts[0], childCon);
+        }
+    })
+
     async function loadContracts() {
         try {
             const web3 = await getWeb3();
@@ -191,7 +198,7 @@ function App() {
     const mintToken = async () => {
         console.log("Minting 998-parent token...");
         console.log("Local Structure: ", Composable.get_composable_structure());
-       
+        let childCon = ERC1155PresetMinterPauser.networks[networkId].address;
         
         setMintParentOpen(false);
         let result = await erc998Minter.methods.mint(accounts[0], tokenID).send({ from: accounts[0] });  
@@ -209,7 +216,7 @@ function App() {
             // update IPFS of 998 token on smart contract
             console.log("Updating IPFS of 998 token on smart contract...");
             // await erc998Minter.methods.setTokenURI(tokenID, url).send({ from: accounts[0] });
-            Composable.updateFlow();            
+            Composable.updateFlow(accounts[0], childCon);            
         }
     }
 
@@ -257,7 +264,7 @@ function App() {
             // await erc998Minter.methods.setTokenURI(childTokenID, url).send({ from: accounts[0] });
             var parent_url =  Composable.get_ipfs_link(parentAcc, parentTokenID);
             // await erc998Minter.methods.setTokenURI(parentTokenID, parent_url).send({ from: accounts[0] });
-            Composable.updateFlow();
+            Composable.updateFlow(accounts[0], childCon);
         }
 
         else {
@@ -386,7 +393,7 @@ function App() {
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
             console.log("Composable sessionz: ", Composable.get_composable_session());
-            Composable.updateFlow();
+            Composable.updateFlow(accounts[0], addr_from);
         }
 
         else {
@@ -402,6 +409,7 @@ function App() {
         setMintChild998Open(false);
         let result = await erc998Minter.methods.mint(accounts[0], childTokenID).send({ 
             from: accounts[0] });
+        let childCon = ERC1155PresetMinterPauser.networks[networkId].address;
 
         // console.log(result);
         
@@ -441,7 +449,7 @@ function App() {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
-            Composable.updateFlow();
+            Composable.updateFlow(accounts[0], childCon);
         }
 
         else {
@@ -457,15 +465,17 @@ function App() {
         var owner_addr = await erc998Minter.methods.ownerOf(tokenID).call()
         let res = await erc998Minter.methods.safeTransferFrom(accounts[0], accTransferTo, tokenID, web3.utils.encodePacked(tokenID)).send({ from: accounts[0] });
         console.log(res);
+        let childCon = ERC1155PresetMinterPauser.networks[networkId].address;
         
         console.log(owner_addr)
         let x = await Composable.replace_owner(owner_addr, accTransferTo, tokenID);
 
+        
         if (x) {
             setNullState();
             console.log("IPFS mappings updated!");
             console.log("Composable structure: ", Composable.get_composable_structure());
-            Composable.updateFlow();
+            Composable.updateFlow(accounts[0], childCon);
         }
 
         else {

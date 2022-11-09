@@ -292,7 +292,7 @@ export function delete_contract_token_mapping(owner_addr, tokenID) {
 
 export async function replace_owner(owner_addr, new_owner_addr, tokenID){
     if(!composable[new_owner_addr]) composable[new_owner_addr] = {};
-    if(!composable[new_owner_addr][tokenID]) 
+    if(!composable[new_owner_addr][tokenID]) composable[new_owner_addr][tokenID] = {};
 
     if (sessionStorage.getItem('composable') != null) {
         var old_composable = JSON.parse(sessionStorage.getItem('composable'));
@@ -301,7 +301,7 @@ export async function replace_owner(owner_addr, new_owner_addr, tokenID){
         }
     }
     
-    composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID];
+    // composable[new_owner_addr][tokenID] = composable[owner_addr][tokenID];
 
 
     console.log("updating token owner....");
@@ -518,9 +518,49 @@ export async function cache_cid(cid) {
 
 export var nodes = [];
 export var edges = [];
+// var composable = get_composable_session();
+
+async function render_children(child_object_array, parent_node, max_right_push) {
+    
+    // recursively render children in array
+    for (var k = 0; k < child_object_array.length; k++) {
+        if (child_object_array[k][0] === 0 && child_object_array[k][1] === 0) {
+            // remove stub child
+            child_object_array.splice(k, 1);
+        }
+    }
+    for (var i = 0; i < child_object_array.length; i++) {
+            console.log("child rendering: ", child_object_array[i]);
+            var node = {};
+            node.type = "custom";
+            var child_address = child_object_array[i][0];
+            var tokenID = child_object_array[i][1];
+            var metadata = await get_token_metadata(child_address, tokenID);        
+            var link = get_ipfs_link(child_address, tokenID);
+            node.id = tokenID;
+            node.position = {x: parent_node.position.x + (275 * i), y: parent_node.position.y + 225};
+
+            if (node.position.x > max_right_push) {
+                max_right_push = node.position.x;
+            }
+            node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  owner_address: metadata.owner_address, recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage, position: node.position, parent_tokens: metadata.properties.parent_tokens, child_tokens: metadata.properties.child_tokens};
+            
+            nodes.push(node);
+            if (metadata["properties"]["child_tokens"].length > 0) {
+                console.log("metadata child tokens", metadata["properties"]["child_tokens"]);
+                var child_rec_object_array = [];
+                for (var j = 0; j < metadata["properties"]["child_tokens"].length; j++) {
+                    child_rec_object_array.push([metadata["properties"]["child_tokens"][j]["contract_address"], metadata["properties"]["child_tokens"][j]["token_id"]]);
+                    max_right_push = await render_children(child_rec_object_array, node, max_right_push);
+                } 
+            }
+    }
+
+    return max_right_push;
+}
 
 
-export async function getNodes() {
+export async function getNodes(acc, childCon) {
     nodes = [];
     var node = {};
     var composable = get_composable_session();
@@ -528,56 +568,42 @@ export async function getNodes() {
     var down_push = 0;
     var max_right_push = 0;
     for (var contractAddress in composable) {
-        for (var tokenID in composable[contractAddress]) {
-            // if tokenId is not a node.id in nodes[]
-            if (!nodes.some(x => x.id === tokenID)) {
-                console.log("rendering tokenID: ", tokenID);
-                node = {};
-
-                node.position = {x: 250 + max_right_push + (275 * down_push), y: 25};
-                if (node.position.x > max_right_push) {
-                    max_right_push = node.position.x;
-                }
-            
-
-                var metadata = await get_token_metadata(contractAddress, tokenID);
-                console.log("Nodes metadata: ", metadata);
-                var link = get_ipfs_link(contractAddress, tokenID);
-
-                node.id = tokenID;
-                node.type = "custom";
-                node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  owner_address: metadata.owner_address, recycled: metadata.properties.recycled, ownership_stage: metadata.properties.ownership_stage, position: node.position, parent_tokens: metadata.properties.parent_tokens, child_tokens: metadata.properties.child_tokens};
-                nodes.push(node);
-
-                // render children
-
-                if (composable[contractAddress][tokenID]["children"] !== undefined) {
-                if (composable[contractAddress][tokenID]["children"].length > 0) {
-                    var parent_node = node;
-                    console.log("rendering child tokenID: ", tokenID);
-                    // render all children
-                    for (var i = 0; i < composable[contractAddress][tokenID]["children"].length; i++) {
-                        var child = composable[contractAddress][tokenID]["children"][i];
-                        console.log("all children ", composable[contractAddress][tokenID]["children"]);
-                        console.log("Child: ", child);
-                       
-                        var child_metadata = await get_token_metadata(child[0], child[1]);
-                        var child_link = get_ipfs_link(child[0], child[1]);
-                        node = {};
-                        node.id = child[1];
-                        node.position = {x: parent_node.position.x + (275 * i), y: parent_node.position.y + 225};
-                        if (node.position.x > max_right_push) {
-                            max_right_push = node.position.x;
-                        }
-                        node.type = "custom";
-                        node.data = { label: child[1], name: child_metadata.name, ipfs_link: child_link, description: child_metadata.description, owner_address: child_metadata.owner_address, recycled: child_metadata.properties.recycled, ownership_stage: child_metadata.properties.ownership_stage, position: node.position, parent_tokens: child_metadata.properties.parent_tokens, child_tokens: child_metadata.properties.child_tokens};
-                        nodes.push(node);
+        if(contractAddress === acc){
+            for (var tokenID in composable[contractAddress]) {
+                // if tokenId is not a node.id in nodes[]
+                if (!nodes.some(x => x.id === tokenID)) {
+                    console.log("rendering tokenID: ", tokenID);
+                    node = {};
+    
+                    node.position = {x: 250 + max_right_push + (275 * down_push), y: 25};
+                    if (node.position.x > max_right_push) {
+                        max_right_push = node.position.x;
                     }
-                }
+                
+    
+                    var metadata = await get_token_metadata(contractAddress, tokenID);
+                    console.log("Nodes metadata: ", metadata);
+                    var link = get_ipfs_link(contractAddress, tokenID);
+    
+                    node.id = tokenID;
+                    node.type = "custom";
+                    node.data = { label: tokenID,  name: metadata.name, ipfs_link: link, description: metadata.description,  owner_address: metadata.owner_address, recycled: metadata.properties.recycled, parent_tokens: metadata.properties.parent_tokens, child_tokens: metadata.properties.child_tokens};
+                    nodes.push(node);
+    
+                    // render children
+    
+                    if (composable[contractAddress][tokenID]["children"] !== undefined) {
+                        if (composable[contractAddress][tokenID]["children"].length > 0) {
+                            console.log("rendering children for: ", tokenID);
+                            console.log("GN children: ", composable[contractAddress][tokenID]["children"]);
+                            max_right_push = await render_children(composable[contractAddress][tokenID]["children"], node, max_right_push);
+                        }
+                    }
+                      
                 }
             }
+            down_push++;
         }
-        down_push++;
     }
 
     console.log("Nodes: ", nodes);
@@ -589,11 +615,12 @@ export async function getNodes() {
 }
 
 // get children of each tokenID from composable and add to edges
-export function getEdges() {
+export function getEdges(acc, childCon) {
     edges = [];
     var edge = {};
     var composable = get_composable_session();
     for (var contract_address in composable) {
+    
         for (var token in composable[contract_address]) {
             for (var child_data in composable[contract_address][token]["children"]) {
                 edge = {};
@@ -609,6 +636,7 @@ export function getEdges() {
                 edges.push(edge);
             }
         }
+    
     }
 
     console.log("Edges: ", edges);
@@ -620,9 +648,9 @@ export function getEdges() {
 }
 
 
-export function updateFlow() {
-    getNodes();
-    getEdges();
+export function updateFlow(acc, childCon) {
+    getNodes(acc, childCon);
+    getEdges(acc, childCon);
     return [nodes, edges];
 }
 

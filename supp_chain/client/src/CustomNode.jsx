@@ -28,9 +28,7 @@ function CustomNode({ id, data}) {
             id={id}
         />
         <div className="custom-node__body">
-            <div>Pos: <strong>{data.position.x}</strong>, <strong>{data.position.y}</strong></div>
             <div>Owner Address: <strong>{shortenedAddress}</strong></div>
-            <div>Ownership Stage: <strong>{data.ownership_stage}</strong></div>
             <div>Description: <strong>{data.description}</strong></div>
             <div>Recycle Status: <strong>{data.recycled}</strong></div>
             <div>Metadata: <strong><a href={data.ipfs_link}>IPFS data</a></strong></div>
