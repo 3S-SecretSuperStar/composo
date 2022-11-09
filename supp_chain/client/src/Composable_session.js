@@ -260,7 +260,6 @@ export function add_parent_mapping(owner_addr, tokenID, parent_addr, parent_toke
         var old_composable = JSON.parse(sessionStorage.getItem('composable'));
         if (owner_addr in old_composable) {
             if (tokenID in old_composable[owner_addr]) {
-                console.log("SESH DEETS: ", old_composable[owner_addr][tokenID]);
                 composable[owner_addr][tokenID] = old_composable[owner_addr][tokenID];
             }
         }
@@ -319,8 +318,6 @@ export async function replace_owner(owner_addr, new_owner_addr, tokenID){
 
     update_ipfs(new_owner_addr, tokenID, url);
 
-    console.log("SESH AFTER REPLACING OWNER: ", get_composable_session());
-
     return true;
 
 }
@@ -346,10 +343,7 @@ export function remove_parent_mapping(owner_addr, tokenID, parent_addr, parent_t
         }
     } catch {}
     
-    set_composable_session();
-    console.log("Presistent structure's parents after removing parent: ", sessionStorage.getItem('composable'));
-
-    
+    set_composable_session();    
 }
 
 // update children of a token
@@ -400,10 +394,7 @@ export function remove_children_mapping(owner_addr, tokenID, child_addr, child_t
 
     } catch {}
 
-
-
     set_composable_session();
-    //console.log("Presistent structure's children after removing children: ", sessionStorage.getItem('composable'));
     
 }
 
@@ -490,8 +481,7 @@ export async function cache_cid(cid) {
     console.log("Attempting to cache CID on some public gatways...");
     // loop through gateways
     for (var i = 0; i < gateways.length ; i++) {
-        
-        //console.log("Trying to cache link: ", gateways[i] + "ipfs/"+ cid);
+
         res = fetch(
             "https://" + l + ".ipfs.nftstorage.link/metadata.json", {
             method: "GET",
@@ -502,8 +492,6 @@ export async function cache_cid(cid) {
             },
         }).then((response) => {
             if (response.status === 200) {
-                //console.log("Successfully cached CID on gateway: ", response.url);
-                //console.log('response.status: ', response.status); 
                 return response.url;
             }
         });
@@ -530,7 +518,6 @@ async function render_children(child_object_array, parent_node, max_right_push) 
         }
     }
     for (var i = 0; i < child_object_array.length; i++) {
-            console.log("child rendering: ", child_object_array[i]);
             var node = {};
             node.type = "custom";
             var child_address = child_object_array[i][0];
@@ -547,7 +534,6 @@ async function render_children(child_object_array, parent_node, max_right_push) 
             
             nodes.push(node);
             if (metadata["properties"]["child_tokens"].length > 0) {
-                console.log("metadata child tokens", metadata["properties"]["child_tokens"]);
                 var child_rec_object_array = [];
                 for (var j = 0; j < metadata["properties"]["child_tokens"].length; j++) {
                     child_rec_object_array.push([metadata["properties"]["child_tokens"][j]["contract_address"], metadata["properties"]["child_tokens"][j]["token_id"]]);
@@ -572,7 +558,6 @@ export async function getNodes(acc, childCon) {
             for (var tokenID in composable[contractAddress]) {
                 // if tokenId is not a node.id in nodes[]
                 if (!nodes.some(x => x.id === tokenID)) {
-                    console.log("rendering tokenID: ", tokenID);
                     node = {};
     
                     node.position = {x: 250 + max_right_push + (275 * down_push), y: 25};
@@ -582,7 +567,6 @@ export async function getNodes(acc, childCon) {
                 
     
                     var metadata = await get_token_metadata(contractAddress, tokenID);
-                    console.log("Nodes metadata: ", metadata);
                     var link = get_ipfs_link(contractAddress, tokenID);
     
                     node.id = tokenID;
@@ -594,8 +578,6 @@ export async function getNodes(acc, childCon) {
     
                     if (composable[contractAddress][tokenID]["children"] !== undefined) {
                         if (composable[contractAddress][tokenID]["children"].length > 0) {
-                            console.log("rendering children for: ", tokenID);
-                            console.log("GN children: ", composable[contractAddress][tokenID]["children"]);
                             max_right_push = await render_children(composable[contractAddress][tokenID]["children"], node, max_right_push);
                         }
                     }
@@ -606,7 +588,7 @@ export async function getNodes(acc, childCon) {
         }
     }
 
-    console.log("Nodes: ", nodes);
+    //console.log("Nodes: ", nodes);
 
     window.sessionStorage.nodes = JSON.stringify(nodes);
 
@@ -625,7 +607,6 @@ export function getEdges(acc, childCon) {
             for (var child_data in composable[contract_address][token]["children"]) {
                 edge = {};
                 edge.id = token + "-" + composable[contract_address][token]["children"][child_data][1];
-                //console.log("Edge ID added: ", edge.id);
                 edge.source = token;
                 edge.target = composable[contract_address][token]["children"][child_data][1];
                 edge.label = "owns";
@@ -639,7 +620,7 @@ export function getEdges(acc, childCon) {
     
     }
 
-    console.log("Edges: ", edges);
+    //console.log("Edges: ", edges);
 
     window.sessionStorage.edges = JSON.stringify(edges);
 
