@@ -41,13 +41,11 @@ function App() {
     const [networkId, setNetworkId] = useState("");
     const [erc998Minter, setERC998Minter] = useState("");
     const [erc1155Minter, setERC1155Minter] = useState("");
-    const [erc998Composable, setERC998Composable] = useState("");
     const [mintParentOpen, setMintParentOpen] = useState(false);
     const [mintChildOpen, setMintChildOpen] = useState(false);
     const [mintChild998Open, setMintChild998Open] = useState(false);
     const [transferChild, setTransferChild] = useState(false);
     const [transferParentOpen, setTransferParentOpen] = useState(false);
-    const [accTransferFrom, setAccTransferFrom] = useState("");
     const [accTransferTo, setAccTransferTo] = useState("");
     const [tokenName, setTokenName] = useState("");
     const [tokenSuppDeets, setTokenSuppDeets] = useState({
@@ -182,12 +180,6 @@ function App() {
             );
             setERC1155Minter(thisERC1155PresetMinterPauser);
 
-            const thisERC998Composable = new web3.eth.Contract(
-                ERC998ERC1155TopDown.abi,
-                ERC998ERC1155TopDown.networks[networkId] && ERC998ERC1155TopDown.networks[networkId].address,
-            );
-            setERC998Composable(thisERC998Composable);
-
         } catch (error) {
             alert(`Failed to load web3, accounts, or contract. Check console for details.`,);
             console.error(error);
@@ -223,7 +215,7 @@ function App() {
             from: accounts[0] });
         console.log("Mint transaction:", result);
         let x = await erc998Minter.methods.setIsERC1155(childTokenID).send({ from: accounts[0] });
-        console.log("setisERC1155:", result);
+        console.log("setisERC1155:", x);
 
         // child token transfer to 998 contract
         console.log("Transferring 1155-child token to 998 contract...");
@@ -372,6 +364,7 @@ function App() {
         let addr_to = ERC998ERC1155TopDownPresetMinterPauser.networks[networkId].address;
         
         let transfer = await erc998Minter.methods.safeTransferFrom(accounts[0], addr_to, childTokenID, web3.utils.encodePacked(parentTokenID)).send({ from: accounts[0] });
+        console.log("Transfer child 998 transaction:", transfer);
 
         var parentAcc = await erc998Minter.methods.ownerOf(parentTokenID).call();
         var childAcc = await erc998Minter.methods.getChildContract(parentTokenID, childTokenID).call();
@@ -466,10 +459,6 @@ function App() {
                 ...prevState,
                 description : value
             }))
-        }
-
-        if(name === "accTransferFrom"){
-            setAccTransferFrom(value)
         }
 
         if(name === "accTransferTo"){
