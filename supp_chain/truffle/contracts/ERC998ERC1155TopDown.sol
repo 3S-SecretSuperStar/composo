@@ -30,10 +30,26 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
 
     mapping(uint256 => bool) public isERC721;
     mapping(uint256 => bool) public isERC1155;
+    
+    // mapping from tokenID to IPFS hash
+    mapping(uint256 => string) public token_URI;
+
+    uint256[] public rootOwners;
 
     constructor(string memory name, string memory symbol, string memory baseURI) ERC721(name, symbol) public {
         _baseURI();
     }
+
+    // set tokenURI
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
+        token_URI[tokenId] = _tokenURI;
+    }
+
+    // get tokenURI
+    function getTokenURI(uint256 tokenId) public view returns (string memory) {
+        return token_URI[tokenId];
+    }
+
 
     /**
      * @dev Gives child balance for a specific child contract and child id .
@@ -69,15 +85,46 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     }
 
     /**
+     * @dev set root owner
+     */
+    function setRootOwner(uint256 id) public {
+        rootOwners.push(id);
+    }
+
+    /**
+     * @dev gets root owners
+     */
+    function getRootOwners() external view returns(uint256 [] memory){
+        return rootOwners;
+    }
+
+    // /**
+    //  * @dev gets root owner for child
+    //  */
+    // function getRootOwnerID(uint256 childID, address childContract) external view returns(uint256){
+    //     uint256 ro = 0;
+    //     for(uint256 i = 0; i < rootOwners.length; i++){
+    //         uint256[] memory childTokenIds = childIdsOwned(i, childContract);
+    //         for(uint256 j = 0; j < childTokenIds.length; j++){
+    //             if(j == childID){
+    //                 ro = i;
+    //             }
+    //         }
+    //     }
+
+    //     return ro;
+    // }
+
+    /**
      * @dev Transfers child token from a token ID.
      */
-    function safeTransferChildFrom(uint256 fromTokenId, address to, address childContract, uint256 childTokenId, uint256 amount, bytes memory data) public override {
+    function safeTransferChildFrom(uint256 fromTokenId, uint256 root, address to, address childContract, uint256 childTokenId, uint256 amount, bytes memory data) public override {
         require(to != address(0), "ERC998: transfer to the zero address");
 
         address operator = _msgSender();
+        // uint256 o = _holdersOf[childContract][childTokenId];
         require(
-            ownerOf(fromTokenId) == operator ||
-            isApprovedForAll(ownerOf(fromTokenId), operator),
+            ownerOf(root) == operator,
             "ERC998: caller is not owner nor approved"
         );
 
@@ -86,9 +133,21 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         _removeChild(fromTokenId, childContract, childTokenId, amount);
 
         // TODO: maybe check if to == this
-        ERC1155(childContract).safeTransferFrom(address(this), to, childTokenId, amount, data);
-        emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
+        if(isERC1155[childTokenId]){
+            ERC1155(childContract).safeTransferFrom(address(this), to, childTokenId, amount, data);
+            emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
+        } else {
+            ERC721(childContract).safeTransferFrom(address(this), to, childTokenId, data);
+            emit TransferSingleChild(fromTokenId, to, childContract, childTokenId, amount);
+        }
+        
+       
+        
+        
     }
+
+
+
 
     /**
      * @dev Returns the owner of the token specified by tokenId. Wrapper function for ERC721 function ownerOf(). 
@@ -97,21 +156,35 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
         return ownerOf(tokenID);
     }
 
-    function setIsERC721(uint256 tokenID) public {
-        isERC721[tokenID] = true;
-    }
 
-    function getIsERC721(uint256 tokenID) external view returns(bool) {
-        return isERC721[tokenID];
-    }
-
+    /**
+     * @dev Sets isERC1155 array 
+    */
     function setIsERC1155(uint256 tokenID) public {
         isERC1155[tokenID] = true;
     }
 
+    // /**
+    //  * @dev gets true if tokenID is ERC721
+    // */
+    // function getIsERC721(uint256 tokenID) external view returns(bool) {
+    //     return isERC721[tokenID];
+    // }
+
+    // /**
+    //  * @dev Sets isERC721 array 
+    // */
+    // function setIsERC721(uint256 tokenID) public {
+    //     isERC721[tokenID] = true;
+    // }
+
+    /**
+     * @dev gets true if tokenID is ERC1155
+    */
     function getIsERC1155(uint256 tokenID) external view returns(bool) {
         return isERC1155[tokenID];
     }
+    
 
     /**
      * @dev Returns the contract address of the child token ID, given a parent and child token ID.
@@ -181,7 +254,7 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     }
 
     /**
-     * @dev Receives a child token, the receiver token ID must be encoded in the
+     * @dev Receives a child 998 token, the receiver token ID must be encoded in the
      * field data.
      */
     function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data) virtual public override returns(bytes4) {
@@ -227,7 +300,7 @@ contract ERC998ERC1155TopDown is ERC721, IERC1155Receiver, IERC998ERC1155TopDown
     }
 
     function _removeChild(uint256 tokenId, address childContract, uint256 childTokenId, uint256 amount) internal virtual {
-        require(amount != 0 || _balances[tokenId][childContract][childTokenId] >= amount, "ERC998: insufficient child balance for transfer");
+        require(_balances[tokenId][childContract][childTokenId] >= amount, "ERC998: insufficient child balance for transfer");
         _balances[tokenId][childContract][childTokenId] -= amount;
         if(_balances[tokenId][childContract][childTokenId] == 0) {
             _holdersOf[childContract][childTokenId].remove(tokenId);
