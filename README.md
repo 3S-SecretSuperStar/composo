@@ -1,6 +1,6 @@
 # Composo
 
-Thesis B & C code mateiral.
+Thesis code mateiral.
 
 Setting up the blockchain environment:
 The specific way to setup and launch everything in /supp_chain is as follows:
